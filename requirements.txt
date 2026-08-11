@@ -1,0 +1,25 @@
+# Pinned to versions confirmed present in the project's .venv.
+# Lower bounds use >= so future compatible upgrades install cleanly.
+
+# Core deep-learning stack (CPU-only is fine; CUDA is auto-detected at runtime).
+torch>=2.7.1
+
+# BPE tokenizer used by SmallLMV2 / SmallLM (tokenizers library).
+# Pinned <0.23.1 because transformers 5.x requires tokenizers<0.23.1.
+tokenizers>=0.23.0,<0.23.1
+
+# Numerical utilities used by models and tokenizers.
+numpy>=2.4.4
+
+# Used by src/download_corpus.py to pull the WikiText corpus from HF Hub.
+datasets>=5.0.1
+
+# Hugging Face Hub client (datasets depends on it; useful for downloads too).
+huggingface_hub>=1.26.1
+
+# Web UI (Gradio chat interface).
+gradio>=4.0.0
+
+# Document upload pipeline.
+PyPDF2>=3.0.0
+python-docx>=1.0.0

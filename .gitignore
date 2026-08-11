@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+.eggs/
+
+# IDE / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Logs
+logs/
+*.log
+webui_feedback.jsonl
+webui_sessions.jsonl
+
+# Model checkpoints (huge, regenerate from training scripts)
+checkpoints/
+
+# Local config overrides
+.env
+.env.local
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Generated data (large JSONL training files)
+data/*.jsonl
+data/*.pt
+
+# Claude Code project state
+.claude/
+CLAUDE.md

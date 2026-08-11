@@ -1,0 +1,55 @@
+# AI Project - one-command self-hosted stack.
+#
+# Usage:
+#   docker compose up              # build (if needed) and run
+#   docker compose up -d           # detached (background)
+#   docker compose down            # stop, keep volumes
+#   docker compose down -v         # stop, delete everything (including uploaded docs)
+#
+# After `up`, open http://localhost:7860.
+#
+# Data persistence:
+#   - ai_data   -> /app/data   (uploads, knowledge base)
+#   - ai_logs   -> /app/logs   (feedback log, sessions log)
+#   - ai_checkpoints -> /app/checkpoints   (model weights; large, optional)
+#
+# If you already have model checkpoints on the host, mount them with:
+#   volumes:
+#     - ./checkpoints:/app/checkpoints:ro
+
+services:
+  ai-project:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-project:latest
+    container_name: ai-project
+    restart: unless-stopped
+    ports:
+      - "7860:7860"
+    environment:
+      # All paths are inside the container; volumes map them to the host.
+      - AI_PROJECT_ROOT=/app
+      - WEBUI_HOST=0.0.0.0
+      - WEBUI_PORT=7860
+      # RAG tunables (override if you want):
+      - MAX_INPUT_TOKENS=480
+      - MAX_NEW_TOKENS=50
+      - CONFIDENCE_THRESHOLD=0.80
+    volumes:
+      # Persist uploads + logs across container restarts.
+      - ai_data:/app/data
+      - ai_logs:/app/logs
+      # If you want to mount existing checkpoints from the host:
+      # - ./checkpoints:/app/checkpoints:ro
+    healthcheck:
+      # Gradio serves the chat UI on /; check that it's responsive.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:7860/', timeout=2)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  ai_data:
+  ai_logs:

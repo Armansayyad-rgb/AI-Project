@@ -1,0 +1,51 @@
+# Keep the Docker build context small - exclude anything not needed at runtime.
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+
+# Model checkpoints (huge; mounted via volume at runtime instead)
+checkpoints/
+
+# Generated training data (large JSONL files; not needed for inference)
+data/*.jsonl
+data/*.pt
+
+# Logs and feedback
+logs/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+
+# Git
+.git/
+.gitignore
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Local config overrides
+.env
+.env.local
+
+# Docker files themselves (no recursion into self)
+Dockerfile
+docker-compose.yml
+.dockerignore
