@@ -1,21 +1,22 @@
-# Pinned to versions confirmed present in the project's .venv.
-# Lower bounds use >= so future compatible upgrades install cleanly.
+# Runtime dependencies for AI-Project.
+# Keep bounds compatible with currently published stable PyPI releases so a
+# fresh clone can install reproducibly in Docker and local Python environments.
 
 # Core deep-learning stack (CPU-only is fine; CUDA is auto-detected at runtime).
+# Docker installs the CPU wheel first from PyTorch's official CPU index.
 torch>=2.7.1
 
-# BPE tokenizer used by SmallLMV2 / SmallLM (tokenizers library).
-# Pinned <0.23.1 because transformers 5.x requires tokenizers<0.23.1.
-tokenizers>=0.23.0,<0.23.1
+# BPE tokenizer used by SmallLMV2 / SmallLM.
+tokenizers>=0.22.2,<=0.23.1
 
 # Numerical utilities used by models and tokenizers.
-numpy>=2.4.4
+numpy>=2.4.4,<3.0
 
 # Used by src/download_corpus.py to pull the WikiText corpus from HF Hub.
-datasets>=5.0.1
+datasets>=5.0.0,<6.0
 
 # Hugging Face Hub client (datasets depends on it; useful for downloads too).
-huggingface_hub>=1.26.1
+huggingface_hub>=1.24.0,<2.0
 
 # Web UI (Gradio chat interface).
 gradio>=4.0.0
