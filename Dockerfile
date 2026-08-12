@@ -24,29 +24,26 @@ RUN pip install --no-cache-dir \
 RUN pip install --no-cache-dir \
         -r requirements.txt
 
-# Gradio 4.44.1 / gradio-client 1.3.0 can crash while generating API info
-# when a JSON Schema contains boolean additionalProperties. Patch the known
-# parser bug in the installed client so the local Gradio health probe can
-# receive a successful response instead of a 500.
+# Gradio 4.44.1 / gradio_client 1.3.0 has a known API-schema bug when
+# JSON Schema contains a boolean value (for example additionalProperties=false).
+# Patch get_type() so boolean schemas are handled instead of crashing the root
+# route, which otherwise makes Gradio incorrectly report localhost inaccessible.
 RUN python - <<'PY'
 from pathlib import Path
 import gradio_client
 
 p = Path(gradio_client.__file__).resolve().parent / 'utils.py'
 s = p.read_text(encoding='utf-8')
-old = 'def get_type(schema: dict):\n    if "const" in schema:'
-new = 'def get_type(schema: dict):\n    if isinstance(schema, bool):\n        return "boolean"\n    if "const" in schema:'
-if old not in s:
-    raise RuntimeError(f'Expected Gradio client parser code not found in {p}')
-p.write_text(s.replace(old, new, 1), encoding='utf-8')
-print(f'Patched boolean JSON-schema handling in {p}')
+needle = 'def get_type(schema: dict):\n    if "const" in schema:'
+replacement = 'def get_type(schema: dict):\n    if isinstance(schema, bool):\n        return "boolean"\n    if "const" in schema:'
+if needle in s:
+    s = s.replace(needle, replacement, 1)
+p.write_text(s, encoding='utf-8')
 PY
 
 COPY . .
 
 # Gradio 4 accepts theme/css on Blocks(), not Blocks.launch().
-# Keep this compatibility adjustment in the image until the UI source is
-# migrated as a whole; this prevents clean Docker clones from crash-looping.
 RUN python - <<'PY'
 from pathlib import Path
 p = Path('/app/src/webui/app.py')
