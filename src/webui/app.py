@@ -319,7 +319,7 @@ def export_conversation(history: list, fmt: str):
 def build_demo(pipeline: dict, polish_llm=None):
     status = _status_from_pipeline(pipeline)
 
-    with gr.Blocks(title=WEBUI_TITLE) as demo:
+    with gr.Blocks(title=WEBUI_TITLE, theme=gr.themes.Soft(), css=".gradio-container { max-width: 1200px !important; }") as demo:
         # Header with system status. Stays static for now; future work
         # could refresh it after each turn to show live counts.
         gr.HTML(_build_header_html(status))
@@ -333,6 +333,7 @@ def build_demo(pipeline: dict, polish_llm=None):
                         chatbot = gr.Chatbot(
                             label="Conversation",
                             height=520,
+                            type="messages",
                         )
                         with gr.Row():
                             msg = gr.Textbox(
@@ -347,11 +348,6 @@ def build_demo(pipeline: dict, polish_llm=None):
                             send_btn = gr.Button(
                                 "Send", scale=1, variant="primary"
                             )
-                        gr.Examples(
-                            examples=[[q] for q in EXAMPLE_QUESTIONS],
-                            inputs=[msg],
-                            label="Try one of these",
-                        )
                         with gr.Row():
                             clear_btn = gr.Button(
                                 "Clear conversation", variant="stop"
@@ -389,11 +385,17 @@ def build_demo(pipeline: dict, polish_llm=None):
                             visible=False,
                         )
 
-                chat_inputs = [
-                    msg, chatbot, top_k, threshold,
-                    gr.State(pipeline),
-                    gr.State(None),  # polish_llm_state, set in main()
-                ]
+                def _respond_server(message, history, top_k_value, threshold_value):
+                    return respond(
+                        message,
+                        history,
+                        top_k_value,
+                        threshold_value,
+                        pipeline,
+                        polish_llm,
+                    )
+
+                chat_inputs = [msg, chatbot, top_k, threshold]
                 # Per-turn state used by the feedback buttons.
                 last_intent_box = gr.State("")
                 last_answer_type_box = gr.State("")
@@ -412,11 +414,11 @@ def build_demo(pipeline: dict, polish_llm=None):
                     last_sources_box, feedback_status,
                 ]
                 send_btn.click(
-                    respond, inputs=chat_inputs, outputs=chat_outputs,
+                    _respond_server, inputs=chat_inputs, outputs=chat_outputs,
                     api_name="chat",
                 )
                 msg.submit(
-                    respond, inputs=chat_inputs, outputs=chat_outputs,
+                    _respond_server, inputs=chat_inputs, outputs=chat_outputs,
                 )
                 clear_btn.click(
                     clear_history, outputs=chat_outputs,
@@ -476,9 +478,13 @@ def build_demo(pipeline: dict, polish_llm=None):
                     interactive=False,
                 )
 
+                def _handle_uploads_server(files):
+                    status_md, rows, _header_html = handle_uploads(files, pipeline)
+                    return status_md, rows
+
                 upload_btn.click(
-                    handle_uploads,
-                    inputs=[upload, gr.State(pipeline)],
+                    _handle_uploads_server,
+                    inputs=[upload],
                     outputs=[upload_status, kb_table],
                 )
 
@@ -538,10 +544,7 @@ def main():
         server_port=WEBUI_PORT,
         show_error=True,
         inbrowser=False,
-        theme=gr.themes.Soft(),
-        css="""
-        .gradio-container { max-width: 1200px !important; }
-        """,
+        share=False,
     )
 
 
