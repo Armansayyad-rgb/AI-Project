@@ -15,8 +15,9 @@ numpy>=2.4.4,<3.0
 # Used by src/download_corpus.py to pull the WikiText corpus from HF Hub.
 datasets>=5.0.0,<6.0
 
-# Hugging Face Hub client (datasets depends on it; useful for downloads too).
-huggingface_hub>=1.24.0,<2.0
+# Gradio 4.44.1 still imports the legacy HfFolder class, which was removed in
+# huggingface_hub 1.0. Keep the hub client on the compatible 0.x line.
+huggingface_hub>=0.26.1,<1.0
 
 # Web UI. The current UI uses Textbox(show_copy_button=...), which is part of
 # the Gradio 4.44.1 API. Pin it so fresh Docker builds do not break on newer
