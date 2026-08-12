@@ -18,8 +18,10 @@ datasets>=5.0.0,<6.0
 # Hugging Face Hub client (datasets depends on it; useful for downloads too).
 huggingface_hub>=1.24.0,<2.0
 
-# Web UI (Gradio chat interface).
-gradio>=4.0.0
+# Web UI. The current UI uses Textbox(show_copy_button=...), which is part of
+# the Gradio 4.44.1 API. Pin it so fresh Docker builds do not break on newer
+# incompatible Gradio releases.
+gradio==4.44.1
 
 # Document upload pipeline.
 PyPDF2>=3.0.0
