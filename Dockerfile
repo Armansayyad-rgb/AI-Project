@@ -24,26 +24,10 @@ RUN pip install --no-cache-dir \
 RUN pip install --no-cache-dir \
         -r requirements.txt
 
-# Gradio 4.44.1 / gradio_client 1.3.0 has a known API-schema bug when
-# JSON Schema contains a boolean value (for example additionalProperties=false).
-# Patch get_type() so boolean schemas are handled instead of crashing the root
-# route, which otherwise makes Gradio incorrectly report localhost inaccessible.
-RUN python - <<'PY'
-from pathlib import Path
-import gradio_client
-
-p = Path(gradio_client.__file__).resolve().parent / 'utils.py'
-s = p.read_text(encoding='utf-8')
-needle = 'def get_type(schema: dict):\n    if "const" in schema:'
-replacement = 'def get_type(schema: dict):\n    if isinstance(schema, bool):\n        return "boolean"\n    if "const" in schema:'
-if needle in s:
-    s = s.replace(needle, replacement, 1)
-p.write_text(s, encoding='utf-8')
-PY
-
 COPY . .
 
-# Gradio 4 accepts theme/css on Blocks(), not Blocks.launch().
+# Gradio 4 accepts theme/css on Blocks(), not Blocks.launch(). Keep this small
+# compatibility rewrite until the UI source is migrated as a whole.
 RUN python - <<'PY'
 from pathlib import Path
 p = Path('/app/src/webui/app.py')
@@ -64,4 +48,6 @@ ENV PYTHONUNBUFFERED=1 \
 
 EXPOSE 7860
 
-CMD ["python", "-m", "webui_launcher"]
+# Start through the runtime compatibility bootstrap so the Gradio schema patch
+# is guaranteed to be active before the project UI is imported.
+CMD ["python", "-m", "webui_bootstrap"]
