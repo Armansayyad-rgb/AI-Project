@@ -32,6 +32,9 @@ services:
       - AI_PROJECT_ROOT=/app
       - WEBUI_HOST=0.0.0.0
       - WEBUI_PORT=7860
+      # Keep Gradio's self-check for localhost out of inherited Docker/host proxies.
+      - NO_PROXY=localhost,127.0.0.1,::1
+      - no_proxy=localhost,127.0.0.1,::1
       # RAG tunables (override if you want):
       - MAX_INPUT_TOKENS=480
       - MAX_NEW_TOKENS=50
