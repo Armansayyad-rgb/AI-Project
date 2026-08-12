@@ -1,9 +1,7 @@
 # Runtime dependencies for AI-Project.
-# Keep bounds compatible with currently published stable PyPI releases so a
-# fresh clone can install reproducibly in Docker and local Python environments.
+# Pin the web UI stack to versions known to work together with Gradio 4.44.1.
 
 # Core deep-learning stack (CPU-only is fine; CUDA is auto-detected at runtime).
-# Docker installs the CPU wheel first from PyTorch's official CPU index.
 torch>=2.7.1
 
 # BPE tokenizer used by SmallLMV2 / SmallLM.
@@ -15,19 +13,14 @@ numpy>=2.4.4,<3.0
 # Used by src/download_corpus.py to pull the WikiText corpus from HF Hub.
 datasets>=5.0.0,<6.0
 
-# Gradio 4.44.1 still imports the legacy HfFolder class, which was removed in
-# huggingface_hub 1.0. Keep the hub client on the compatible 0.x line.
-huggingface_hub>=0.26.1,<1.0
-
-# Gradio 4.44.1 / gradio-client 1.3.0 can crash while generating API schema
-# with Pydantic 2.11+ because boolean additionalProperties values are emitted.
-# Keep Pydantic below 2.11 for this UI stack.
-pydantic>=2.0,<2.11
-
-# Web UI. The current UI uses Textbox(show_copy_button=...), which is part of
-# the Gradio 4.44.1 API. Pin it so fresh Docker builds do not break on newer
-# incompatible Gradio releases.
+# Gradio 4.44.1-compatible web stack.
 gradio==4.44.1
+gradio_client==1.3.0
+fastapi==0.115.3
+pydantic==2.9.2
+httpx==0.27.2
+uvicorn==0.32.0
+huggingface_hub==0.26.1
 
 # Document upload pipeline.
 PyPDF2>=3.0.0
