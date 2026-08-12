@@ -43,15 +43,17 @@ COPY . .
 # Pre-create writable directories for runtime artifacts.
 RUN mkdir -p /app/data/uploads /app/logs /app/checkpoints
 
-# Default env vars; can be overridden by `docker run -e ...` or compose.
+# Runtime environment. The application modules live under /app/src, so add
+# that directory to Python's module search path while keeping /app as the
+# project root for data/config resolution.
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app/src \
     AI_PROJECT_ROOT=/app \
     WEBUI_HOST=0.0.0.0 \
     WEBUI_PORT=7860
 
 EXPOSE 7860
 
-# Launch the Gradio web UI. The launcher imports the app module, which
-# loads the RAG pipeline on first run (a few seconds).
+# Launch the Gradio web UI.
 CMD ["python", "-m", "webui_launcher"]
