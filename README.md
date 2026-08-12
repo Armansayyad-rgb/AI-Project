@@ -2,7 +2,7 @@
 
 A self-hosted, local-first question-answering system with a custom-trained reasoning model and retrieval over a knowledge base.
 
-**100% local. Your data never leaves your machine.** Runs on a laptop, a Raspberry Pi, or a $5 VPS.
+**100% local. Your data never leaves your machine.** Runs on a laptop, a Raspberry Pi, or a VPS.
 
 ---
 
