@@ -34,18 +34,50 @@ htmlcov/
 .tox/
 .nox/
 
-# Logs
+# Logs and user-generated records
 logs/
 *.log
 webui_feedback.jsonl
 webui_sessions.jsonl
 
-# Model checkpoints (huge, regenerate from training scripts)
+# Model checkpoints (large / potentially proprietary)
 checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
 
-# Local config overrides
+# Secrets and local configuration
 .env
-.env.local
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+secrets.yaml
+secrets.yml
+
+# Private business / commercialization material
+private/
+internal/
+business/
+strategy/
+pitch/
+acquisition/
+valuation/
+docs/internal/
+*PRIVATE*.md
+*INTERNAL*.md
+*VALUATION*.md
+*ACQUISITION*.md
+*PITCH*.md
+SESSION_SUMMARY.md
+CHANGELOG_SESSION.md
+WEB_UI_PLAN.md
+README_AI_PROJECT*.md
 
 # OS junk
 .DS_Store
