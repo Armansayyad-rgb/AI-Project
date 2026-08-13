@@ -1,13 +1,25 @@
-import argparse
-import sys
+import os
+from pathlib import Path
 
-import torch
-from tokenizers import Tokenizer
+# Resolve paths via project config (same as rag_chat_v2 does)
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_ROOT_CONFIG_PATH = _PROJECT_ROOT / "config.py"
 
-from model import SmallLM
+import importlib.util as _importlib_util
+_spec = _importlib_util.spec_from_file_location(
+    "config", str(_ROOT_CONFIG_PATH)
+)
+if _spec is None or _spec.loader is None:
+    raise ImportError(
+        f"Could not load project config at {_ROOT_CONFIG_PATH}."
+    )
+_project_config = _importlib_util.module_from_spec(_spec)
+_sys_config = __import__("sys")
+_sys_config.modules["config"] = _project_config
+_spec.loader.exec_module(_project_config)
 
-TOKENIZER_FILE = r"C:\AI-Project\data\tokenizer.json"
-MODEL_FILE = r"C:\AI-Project\checkpoints\final_model.pt"
+TOKENIZER_FILE = _project_config.TOKENIZER_FILE
+MODEL_FILE = _project_config.MODEL_FILE
 
 MAX_NEW_TOKENS = 100
 TEMPERATURE = 0.8

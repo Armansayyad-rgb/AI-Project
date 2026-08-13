@@ -197,9 +197,13 @@ def collate_batch(
 
 
 def main():
-    if not torch.cuda.is_available():
-        raise RuntimeError(
-            "CUDA GPU was not detected."
+if not torch.cuda.is_available():
+            import warnings
+            warnings.warn(
+                "CUDA GPU not detected - training will be slow on CPU. "
+                "Continuing with CPU training.",
+                UserWarning,
+            )
         )
 
     device = "cuda"

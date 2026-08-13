@@ -53,7 +53,6 @@ def extraction_confidence(
             evidence_answer = evidence_answer[
                 len(prefix):
             ]
-            break
 
     evidence_answer = evidence_answer.rstrip(".")
 
