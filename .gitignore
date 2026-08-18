@@ -26,6 +26,13 @@ dist/
 *.swo
 *~
 
+# Local backups / temporary files
+*.bak
+*.tmp
+*.temp
+*.orig
+*.rej
+
 # Testing / coverage
 .pytest_cache/
 .coverage
