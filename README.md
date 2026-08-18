@@ -1,261 +1,400 @@
-# RALG — Retrieval-Augmented Learning & Generation
+<div align="center">
 
-RALG is a **local-first, hardware-efficient retrieval + reasoning system** designed to answer questions from a local knowledge base while keeping compute requirements low.
+# 🧠 RALG
 
-The project combines lightweight routing, retrieval, extractive answering, a compact reasoning path, evidence grounding, false-premise rejection, and **conditional multi-hop retrieval**. The design goal is simple: **use one cheap path for normal questions and spend extra compute only when the question actually needs it.**
+### Retrieval-Augmented Learning & Generation
 
-> RALG is an active research/engineering project. The public repository contains the source code and reproducible project structure, while model checkpoints and other private/local artifacts are intentionally not committed.
+**A local-first, hardware-efficient retrieval + reasoning architecture built to achieve more with less compute.**
 
----
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Local First](https://img.shields.io/badge/AI-Local--First-blueviolet)
+![Hardware](https://img.shields.io/badge/Compute-Hardware%20Efficient-orange)
+![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen)
 
-## Current capabilities
+**⚡ Lightweight · 🔎 Evidence-Grounded · 🧩 Conditional Multi-Hop · 🖥️ Local-First**
 
-- **Local-first inference** — designed to run without a hosted LLM API.
-- **Lightweight question routing** — separates extractive/factual work from reasoning-oriented queries.
-- **Grounded factual QA** — factual candidates are checked against retrieved evidence before being accepted.
-- **False-premise rejection** — unsupported or contradictory questions can be rejected instead of answered confidently.
-- **Conditional multi-hop reasoning** — normal queries keep the standard single retrieval path; detected multi-hop queries can use at most one additional retrieval pass.
-- **Evidence-aware answering** — retrieved context is used to support answer generation and extraction.
-- **Document ingestion** — PDF, DOCX, and TXT uploads can extend the live knowledge base through the web UI.
-- **Gradio web interface** — chat, document upload, answer details, feedback, and export tooling.
-- **CPU and CUDA support** — the pipeline can select CPU or CUDA depending on the environment.
-- **Docker support** — containerized local deployment is included.
+</div>
 
 ---
 
-## Design philosophy
+## 🌟 Overview
 
-RALG is intentionally **not** built as a large multi-model or multi-agent stack.
+**RALG** is an experimental retrieval-augmented learning and generation system designed around one central principle:
 
-The project prioritizes:
+> **Increase capability through better retrieval, routing, grounding, and reasoning — not simply by adding larger models and more hardware.**
 
-- low RAM / VRAM pressure
-- minimal always-on model count
-- one retrieval pass for ordinary queries
-- conditional extra work only for harder queries
-- no separate verifier LLM
-- no always-on neural reranker
-- no per-query index rebuilding
-- evidence grounding before accepting factual answers
-- abstention when reliable evidence is unavailable
+RALG combines lightweight query routing, lexical retrieval, factual extraction, evidence grounding, false-premise rejection, compact reasoning, and conditional multi-hop retrieval in a single local-first pipeline.
 
-The intended execution pattern is:
+Normal questions stay on a cheap execution path. Additional computation is activated only when the query appears to require it.
+
+> 🚧 **Project status:** RALG is under active research and engineering development. Public source code and reproducible project structure are included in this repository. Private/local model checkpoints and sensitive development artifacts are intentionally excluded.
+
+---
+
+## ✨ Core Capabilities
+
+| Capability | Description |
+|---|---|
+| 🖥️ **Local-First Inference** | Designed to operate without depending on a hosted LLM API. |
+| 🧭 **Lightweight Routing** | Separates factual/extractive work from reasoning-oriented queries. |
+| 🔎 **Retrieval-Augmented Answering** | Searches the local knowledge corpus before producing evidence-dependent answers. |
+| 🎯 **Grounded Factual QA** | Factual candidates are checked against retrieved evidence before acceptance. |
+| 🛡️ **False-Premise Rejection** | Unsupported or contradictory questions can be rejected instead of confidently hallucinated. |
+| 🧩 **Conditional Multi-Hop Retrieval** | Ordinary queries use one retrieval pass; detected multi-hop queries may use one additional pass. |
+| 🧠 **Compact Reasoning Path** | Uses the existing small reasoning model for questions that require synthesis. |
+| 📚 **Document Ingestion** | PDF, DOCX, and TXT documents can extend the live knowledge base through the web interface. |
+| 🌐 **Gradio Interface** | Includes chat, document upload, answer details, feedback, and export tooling. |
+| ⚙️ **CPU / CUDA Support** | Supports execution according to available compute hardware. |
+| 🐳 **Docker Support** | Includes container configuration for local/self-hosted deployment. |
+
+---
+
+## 💡 Why RALG?
+
+Many AI systems improve capability by increasing model size, adding more models, introducing neural rerankers, or spending more compute on every request.
+
+RALG explores a different direction.
+
+<div align="center">
+
+### **Do the cheap thing by default. Spend extra compute only when necessary.**
+
+</div>
+
+The architecture prioritizes:
+
+- ⚡ low compute overhead
+- 💾 low RAM / VRAM pressure
+- 🧠 minimal always-loaded model count
+- 🔎 one retrieval pass for ordinary queries
+- 🧩 conditional extra retrieval only for harder queries
+- 🚫 no separate verifier LLM
+- 🚫 no always-on neural reranker
+- ♻️ reuse of corpus/index state
+- 🎯 evidence grounding before factual acceptance
+- 🛑 abstention when reliable evidence is unavailable
+
+---
+
+## 🏗️ Architecture
 
 ```text
-Normal factual query
-    ↓
-lightweight question detection
-    ↓
-single retrieval pass
-    ↓
-factual extraction
-    ↓
-cheap evidence grounding
-    ↓
-answer / abstain
+                         ┌──────────────────────┐
+                         │    User Question     │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │ Routing / Intent     │
+                         │ + Premise Handling   │
+                         └──────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌──────────────────────┐
+                         │      Retrieval       │
+                         └──────────┬───────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    │                               │
+                    ▼                               ▼
+        ┌──────────────────────┐        ┌──────────────────────┐
+        │ Factual / Extractive │        │    Reasoning Path    │
+        │        Path          │        │                      │
+        ├──────────────────────┤        ├──────────────────────┤
+        │ Direct extraction    │        │ Compact reasoning    │
+        │ Evidence grounding   │        │ Intent synthesis     │
+        │ Support validation   │        │ Conditional multi-hop│
+        │ Answer / abstain     │        │ evidence merging     │
+        └──────────┬───────────┘        └──────────┬───────────┘
+                   │                               │
+                   └───────────────┬───────────────┘
+                                   ▼
+                         ┌──────────────────────┐
+                         │ Grounded Response    │
+                         │ + Evidence           │
+                         └──────────────────────┘
+```
 
-Normal reasoning query
-    ↓
-single retrieval pass
-    ↓
-existing reasoning path
-    ↓
-answer
+The core implementation lives under `src/`, including the RAG pipeline, retrieval layers, routing, extraction, confidence/support logic, reasoning components, and evaluation tooling.
 
-Detected multi-hop query
-    ↓
-lightweight decomposition
-    ↓
-base retrieval + at most one extra retrieval
-    ↓
-merge compact evidence
-    ↓
-existing reasoning model
-    ↓
-answer
+---
+
+## ⚙️ Execution Strategy
+
+### 🔹 Normal factual query
+
+```text
+Question
+   ↓
+Lightweight factual detection
+   ↓
+Single retrieval pass
+   ↓
+Factual extraction
+   ↓
+Cheap evidence grounding
+   ↓
+Answer OR abstain
+```
+
+### 🔹 Normal reasoning query
+
+```text
+Question
+   ↓
+Single retrieval pass
+   ↓
+Compact reasoning path
+   ↓
+Answer
+```
+
+### 🔹 Detected multi-hop query
+
+```text
+Question
+   ↓
+Lightweight multi-hop detection
+   ↓
+Simple decomposition
+   ↓
+Base retrieval
+   +
+Maximum one extra retrieval pass
+   ↓
+Evidence merge
+   ↓
+Existing reasoning model
+   ↓
+Answer
 ```
 
 ---
 
-## Architecture
+## 🚀 Hardware-Efficient by Design
 
-At a high level:
+RALG deliberately operates under a constrained compute budget.
+
+| Resource / Component | Current Design |
+|---|---|
+| 🧠 Always-loaded reasoning models | **1** |
+| 🔎 Default retrieval passes | **1** |
+| 🧩 Maximum detected multi-hop passes | **2** |
+| 🤖 Separate verifier LLM | **None** |
+| 📊 Heavy neural reranker | **None** |
+| 🔁 Per-query index rebuilding | **No** |
+| 📚 Corpus/index reuse | **Yes** |
+| 💻 CPU compatibility | **Yes** |
+| 🎮 CUDA compatibility | **Yes** |
+
+These constraints are intentional. RALG attempts to gain capability primarily from **architecture and information flow**, rather than brute-force compute.
+
+---
+
+## 📂 Project Structure
 
 ```text
-User question
-    ↓
-Query routing / intent handling
-    ↓
-Premise validation
-    ↓
-Retrieval
-    ↓
-┌───────────────────────────────┐
-│ Factual / extractive path     │
-│ - direct extraction           │
-│ - cheap grounding check       │
-│ - abstain if unsupported      │
-└───────────────────────────────┘
-               or
-┌───────────────────────────────┐
-│ Reasoning path                │
-│ - compact reasoning model     │
-│ - intent-specific synthesis   │
-│ - optional lightweight        │
-│   multi-hop second retrieval  │
-└───────────────────────────────┘
-    ↓
-Answer + supporting evidence
+RALG/
+│
+├── src/                    # Core retrieval, reasoning and evaluation code
+├── data/                   # Local knowledge data (where applicable)
+├── indexes/                # Retrieval/index artifacts
+├── config.py               # Runtime configuration
+├── requirements.txt        # Python dependencies
+├── Dockerfile              # Container image definition
+├── docker-compose.yml      # Local container deployment
+├── README.md               # Project documentation
+└── LICENSE                 # MIT License
 ```
 
-Core implementation lives under `src/`.
-
-Important modules include the main RAG pipeline, retrieval layers, extraction, routing, confidence/support logic, and the evaluation suites.
+> Some local/private artifacts may not appear in the public repository because they are intentionally excluded from version control.
 
 ---
 
-## Hardware-efficiency constraints
+## 🛠️ Quick Start
 
-The current architecture is designed around the following limits:
-
-- **No additional always-loaded LLM** for factual verification.
-- **No separate verifier model.**
-- **No separate heavy reranker model.**
-- **Default retrieval count: 1.**
-- **Detected multi-hop retrieval count: maximum 2.**
-- **Corpus/index state is reused** rather than rebuilt per query.
-- **The main model is loaded once** during pipeline initialization.
-
-These constraints are deliberate. RALG aims to improve capability primarily through routing, retrieval strategy, extraction, grounding, and compact reasoning rather than brute-force compute.
-
----
-
-## Quick start
-
-### Local Python
+### 1️⃣ Clone the repository
 
 ```powershell
-# Windows PowerShell
 git clone https://github.com/Armansayyad-rgb/RALG-Retrieval-Augmented-Learning-Generation..git
 cd RALG-Retrieval-Augmented-Learning-Generation.
+```
 
+### 2️⃣ Create a virtual environment
+
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+### 3️⃣ Install dependencies
+
+```powershell
 pip install -r requirements.txt
 ```
 
-The project expects local data/tokenizer/model artifacts configured through `config.py` or environment variables.
+### 4️⃣ Configure local artifacts
 
-Model checkpoints are intentionally excluded from the public repository by `.gitignore`.
+The project expects required local knowledge, tokenizer, and model artifacts to be configured through `config.py` or supported environment variables.
 
-Once the required local artifacts are available, run the project using the existing launcher for your environment.
-
-### Docker
-
-Docker support is included through:
-
-- `Dockerfile`
-- `docker-compose.yml`
-
-The container is designed for local/self-hosted use. Private model checkpoints remain local and should be mounted/provided separately rather than committed to GitHub.
+> 🔐 Model checkpoints and other private artifacts are intentionally excluded from the public repository.
 
 ---
 
-## Configuration
+## 🐳 Docker
 
-Runtime paths and settings are centralized in `config.py` and can be overridden by environment variables where supported.
+Docker deployment files are included:
 
-Typical configuration includes:
+```text
+Dockerfile
+docker-compose.yml
+```
 
-- project root
-- tokenizer path
-- reasoning-model checkpoint path
-- knowledge files
-- input/output token limits
-- confidence/support thresholds
-- web UI host/port
-
-Do not commit real credentials or private local configuration. `.env`, checkpoint files, keys, logs, and private/internal material are excluded by the repository's `.gitignore`.
+The container is intended for local/self-hosted deployment. Private model checkpoints should remain outside Git and be mounted or supplied locally when required.
 
 ---
 
-## Evaluation
+## 🔧 Configuration
 
-RALG includes internal evaluation and regression tooling under `src/`.
+Runtime settings are centralized in `config.py` and may include:
 
-The current development process evaluates areas such as:
+- 📁 project root
+- 🧠 reasoning-model checkpoint path
+- 🔤 tokenizer path
+- 📚 knowledge files
+- 📏 input/output token limits
+- 🎯 confidence and support thresholds
+- 🌐 web UI host and port
 
-- causal questions
-- comparison
-- structure
-- summary
-- significance
-- factual QA
-- unsupported questions
-- adversarial / false-premise cases
-- multi-hop behavior
-- latency and resource usage
-
-Evaluation is treated as a development instrument, not a marketing claim. Benchmark-specific answers, entities, or routes should not be hardcoded into the production system.
+Never commit credentials, private keys, model weights, or private runtime configuration.
 
 ---
 
-## Current development focus
+## 📊 Evaluation & Benchmarking
 
-The current engineering priorities are:
+RALG includes internal evaluation and regression tooling designed to measure behavior across multiple question classes.
 
-1. Improve factual extraction without increasing model size.
-2. Strengthen evidence grounding and abstention.
-3. Improve lightweight multi-hop reasoning while keeping the maximum retrieval budget small.
-4. Preserve strong behavior on already-working question categories.
-5. Improve retrieval-quality measurement and reproducible evaluation.
-6. Continue profiling RAM, VRAM, and latency so capability gains remain hardware-efficient.
+Current evaluation areas include:
 
----
+| Area | Evaluated |
+|---|:---:|
+| Causal reasoning | ✅ |
+| Comparison | ✅ |
+| Structure | ✅ |
+| Summary | ✅ |
+| Significance | ✅ |
+| Factual QA | ✅ |
+| Unsupported questions | ✅ |
+| False-premise / adversarial cases | ✅ |
+| Multi-hop behavior | ✅ |
+| Latency / resource behavior | ✅ |
 
-## What RALG is not
+Benchmarking is treated as an **engineering instrument**, not a marketing shortcut.
 
-RALG is not intended to be:
-
-- a hosted frontier-LLM replacement
-- a large multi-agent system
-- an always-online cloud assistant
-- a project that improves accuracy simply by adding more models and hardware
-
-The goal is a **compact retrieval + reasoning architecture that remains useful on modest hardware**.
-
----
-
-## Repository safety
-
-The public repository intentionally excludes common sensitive/private artifacts, including:
-
-- `.env` files and credentials
-- model checkpoints / weights
-- private keys and certificates
-- logs and local runtime state
-- virtual environments and caches
-- private business / commercialization material
-- internal research artifacts that are not intended for publication
-
-See `.gitignore` for the current rules.
+Production logic should remain general. Benchmark-specific answers, entities, expected fragments, or routes must not be hardcoded into the system.
 
 ---
 
-## Contributing
+## 🔬 Current Research Focus
 
-Contributions should preserve the project's main design constraint: **capability improvements should not substantially increase compute requirements for every query.**
+RALG is actively being improved in several areas:
 
-When proposing a change, prefer solutions that are:
-
-- measurable
-- general rather than benchmark-specific
-- resource-efficient
-- backwards-compatible where practical
-- testable with independent questions
+1. 🎯 Improve factual extraction without increasing model size.
+2. 🛡️ Strengthen grounding, evidence validation, and abstention.
+3. 🧩 Improve lightweight multi-hop reasoning within the two-pass retrieval budget.
+4. 🔎 Improve retrieval relevance and retrieval-quality measurement.
+5. 🧪 Expand reproducible regression and benchmark coverage.
+6. ⚡ Profile and reduce latency, RAM, and VRAM requirements.
+7. 🧱 Preserve successful behavior while new capabilities are introduced.
 
 ---
 
-## License
+## 🗺️ Development Direction
 
-MIT. See `LICENSE`.
+```text
+Current RALG
+    │
+    ├── Better factual extraction
+    ├── Stronger evidence grounding
+    ├── Better retrieval quality
+    ├── Lightweight multi-hop reasoning
+    ├── Reproducible benchmarks
+    ├── Resource profiling
+    └── Production-oriented reliability
+            │
+            ▼
+   Compact, measurable and
+   hardware-efficient RAG system
+```
+
+The long-term engineering direction is to make the system increasingly **reliable, measurable, reproducible, integrable, and resource-efficient** without abandoning its compact architecture.
+
+---
+
+## 🚫 What RALG Is Not
+
+RALG is **not** intended to be:
+
+- ❌ a hosted frontier-model replacement
+- ❌ a giant multi-agent architecture
+- ❌ an always-online cloud assistant
+- ❌ a collection of many always-loaded models
+- ❌ a system that improves accuracy only by demanding more hardware
+
+Instead, RALG explores how far a compact retrieval + reasoning architecture can be pushed through better system design.
+
+---
+
+## 🔐 Repository Safety
+
+The public repository intentionally excludes common sensitive or unnecessary local artifacts:
+
+- 🔑 `.env` files and credentials
+- 🧠 model checkpoints / weights
+- 🔐 private keys and certificates
+- 📝 logs and runtime state
+- 📦 virtual environments and caches
+- 💼 private business/commercialization material
+- 🔬 private internal research artifacts
+
+See `.gitignore` for the active exclusion rules.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome when they preserve the core design principle:
+
+> **Capability improvements should not substantially increase compute requirements for every query.**
+
+Prefer changes that are:
+
+- 📏 measurable
+- 🌍 general rather than benchmark-specific
+- ⚡ resource-efficient
+- 🔄 backwards-compatible where practical
+- 🧪 independently testable
+- 📚 clearly documented
+
+---
+
+## 📜 License
+
+This project is released under the **MIT License**.
+
+See `LICENSE` for details.
+
+---
+
+<div align="center">
+
+### 🧠 RALG
+
+**Retrieval-Augmented Learning & Generation**
+
+*Better architecture. Better evidence. Less unnecessary compute.*
+
+⭐ If you find the project interesting, consider starring the repository.
+
+</div>
