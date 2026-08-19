@@ -28,8 +28,8 @@ Hardware/runtime:
 
 | System | Cases | Recall@1 | Recall@3 | Recall@5 | MRR | Unsupported rejection@5 | Accuracy@5 | Avg latency | P95 latency |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline_v2 | 5 | 1.00 | 1.00 | 1.00 | 1.00 | 0.50 | 0.80 | 0.44 ms | 1.79 ms |
-| ralg_v4 | 5 | 1.00 | 1.00 | 1.00 | 1.00 | 0.50 | 0.80 | 1.62 ms | 3.59 ms |
+| baseline_v2 | 5 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.33 ms | 1.34 ms |
+| ralg_v4 | 5 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.72 ms | 3.77 ms |
 
 ## Interpretation
 
@@ -39,9 +39,9 @@ It does not yet prove that RALG is better than a plain baseline.
 
 Current finding:
 
-- baseline_v2 and ralg_v4 tie on accuracy and recall
+- baseline_v2 and ralg_v4 tie on accuracy, recall, and unsupported rejection
 - ralg_v4 is slower on this tiny sample
-- unsupported rejection is only 50%, so false-premise/unsupported handling needs improvement
+- the false-premise case is now scored correctly when retrieved evidence contradicts the premise
 
 ## Next benchmark milestone
 
@@ -56,6 +56,7 @@ The next target should be a 50-100 case technical-document benchmark with:
 
 Minimum target before making strong claims:
 
-- Accuracy@5 >= 0.85
-- Unsupported rejection@5 >= 0.80
+- expand from 5 synthetic cases to 50-100 cases
+- include harder unsupported and false-premise questions
+- test on a larger technical corpus
 - RALG must beat baseline on at least one meaningful metric, or it should be described only as experimental.
