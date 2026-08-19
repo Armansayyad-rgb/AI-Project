@@ -1,0 +1,7 @@
+Compressor Restart SOP. Before restarting the compressor after an overheating event, the technician must confirm cooling airflow, inspect the intake filter, check for blocked vents, and wait until the housing temperature returns to the safe operating range. Restart the compressor only after the inspection is complete.
+
+Electrical Panel Safety SOP. Before opening any electrical panel, the technician must follow lockout tagout, disconnect power, and verify zero energy with an approved meter. Quick repairs do not allow bypassing lockout tagout.
+
+Pump Vibration Troubleshooting Guide. If vibration occurs during pump operation, check alignment, inspect bearings, verify coupling condition, and tighten mounting bolts. Continued operation with abnormal vibration can damage the pump and connected piping.
+
+Hydraulic Press Maintenance Note. If hydraulic pressure drops during operation, inspect the fluid level, check the suction filter, look for external leaks, and confirm that the relief valve is not stuck open.

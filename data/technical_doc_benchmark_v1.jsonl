@@ -1,0 +1,5 @@
+{"id":"industrial_001","category":"maintenance","question":"What should a technician do before restarting the compressor after overheating?","expected_terms":["cooling airflow","inspect the intake filter","restart the compressor"],"supported":true}
+{"id":"industrial_002","category":"safety","question":"Which safety step is required before opening the electrical panel?","expected_terms":["lockout tagout","disconnect power","verify zero energy"],"supported":true}
+{"id":"industrial_003","category":"troubleshooting","question":"What does the manual say about vibration during pump operation?","expected_terms":["check alignment","inspect bearings","mounting bolts"],"supported":true}
+{"id":"industrial_004","category":"unsupported","question":"What is the warranty phone number for the ZX-900 turbine?","expected_terms":["ZX-900 turbine warranty phone"],"supported":false}
+{"id":"industrial_005","category":"false_premise","question":"Why does the safety SOP allow bypassing lockout tagout during quick repairs?","expected_terms":["bypassing lockout tagout"],"supported":false}
