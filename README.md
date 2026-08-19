@@ -109,6 +109,22 @@ Then open:
 http://localhost:7860
 ```
 
+## Windows test runner
+
+After setup, run:
+
+```powershell
+scripts\test_all.bat
+```
+
+For API testing after starting the server:
+
+```powershell
+scripts\test_all.bat api
+```
+
+See [Windows Test Runner](docs/windows_test_runner.md).
+
 ## Evaluation
 
 Evaluation is part of the project, not an afterthought. The repo includes test suites for factual QA, unsupported questions, false-premise rejection, causal questions, comparisons, and multi-hop behavior.
