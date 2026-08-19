@@ -1540,6 +1540,18 @@ def select_evidence_items(
         "subject"
     ]
 
+    subject_words = set(
+        useful_words(
+            subject
+        )
+    )
+
+    q_words = set(
+        useful_words(
+            question
+        )
+    )
+
     candidates = []
 
     seen = set()
@@ -1576,6 +1588,77 @@ def select_evidence_items(
                 sentence,
                 chunk_rank,
             )
+
+            # ==========================================
+            # Subject-relevance floor
+            # ==========================================
+            #
+            # A sentence that mentions NEITHER the
+            # question's subject nor any intent
+            # vocabulary is noise — it cannot support
+            # the answer regardless of how its other
+            # features score (e.g. a starvation-study
+            # sentence in a Roman Empire answer, or a
+            # gamma-ray-burst sentence in a
+            # photosynthesis answer). Demote such
+            # candidates to a hard floor below the
+            # selection cutoff so they never reach the
+            # synthesizer.
+            #
+            # Specialized intents REQUIRE a subject
+            # anchor: intent vocabulary alone is not
+            # enough (a gamma-ray-burst sentence shares
+            # the "energy"/"convert"/"process" markers
+            # of a photosynthesis question yet says
+            # nothing about photosynthesis). The
+            # subject anchor must therefore be
+            # mandatory for non-general intents.
+            #
+            # This uses the existing score_sentence
+            # outputs (subject_words / intent markers)
+            # — no reranker model added.
+
+            s_words = set(
+                useful_words(
+                    sentence
+                )
+            )
+
+            subject_overlap = (
+                subject_words
+                & s_words
+            )
+
+            intent_overlap = (
+                sentence_has_intent_support(
+                    sentence,
+                    intent,
+                )
+            )
+
+            if (
+                intent
+                not in {
+                    "general",
+                    "comparison",
+                }
+                and not subject_overlap
+            ):
+                # Specialized intent but NO subject
+                # anchor: treat as noise even if the
+                # sentence shares intent vocabulary.
+                score = -1000.0
+            elif (
+                not subject_overlap
+                and not intent_overlap
+                and not (
+                    q_words & s_words
+                )
+            ):
+                # No subject anchor, no intent
+                # support, no question-term overlap
+                # either: noise.
+                score = -1000.0
 
             candidates.append(
                 {

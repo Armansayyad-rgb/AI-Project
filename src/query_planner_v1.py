@@ -848,6 +848,9 @@ def extract_subject(
             r"how does (.+?) convert energy"
             r"[.?!]?$",
 
+            r"how does (.+?) convert .+"
+            r"[.?!]?$",
+
             r"explain what occurs in "
             r"(.+?)[.?!]?$",
 
@@ -1067,6 +1070,16 @@ def extract_subject(
 
     elif intent == "effect":
         patterns = [
+            # ----------------------------------
+            # "What were the effects of X on Y?" —
+            # isolate X as the subject (Y is the
+            # second concept handled by multi-hop).
+            # ----------------------------------
+
+            r"what (?:were|are|was|is) "
+            r"the effects of "
+            r"(.+?) on .+",
+
             r"what were the effects of "
             r"(.+?)[.?!]?$",
 
@@ -1135,6 +1148,27 @@ def extract_subject(
 
     elif intent == "change":
         patterns = [
+            # ----------------------------------
+            # Transition questions naming a SECOND
+            # distinct concept.
+            #
+            # "How did the Roman Empire's decline
+            #  affect the development of medieval
+            #  Europe?" ->
+            #  the Roman Empire
+            # ----------------------------------
+
+            r"how did (.+?)(?:'s|'s) "
+            r"(?:decline|fall|collapse|weakening) "
+            r"(?:affect|influenced|influence|impact|"
+            r"shaped|shape|transform) .+",
+
+            r"how did (.+?) "
+            r"(?:affect|influence|influenced|impact|"
+            r"shape|shaped|transform) "
+            r"(?:the )?(?:development|evolution|"
+            r"emergence) of .+",
+
             r"how did (.+?) change over time"
             r"[.?!]?$",
 
