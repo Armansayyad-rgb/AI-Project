@@ -5,3 +5,78 @@ Electrical Panel Safety SOP. Before opening any electrical panel, the technician
 Pump Vibration Troubleshooting Guide. If vibration occurs during pump operation, check alignment, inspect bearings, verify coupling condition, and tighten mounting bolts. Continued operation with abnormal vibration can damage the pump and connected piping.
 
 Hydraulic Press Maintenance Note. If hydraulic pressure drops during operation, inspect the fluid level, check the suction filter, look for external leaks, and confirm that the relief valve is not stuck open.
+
+Conveyor Belt Tracking SOP. If a conveyor belt drifts to one side, stop the conveyor, inspect roller alignment, remove material buildup, and adjust the tracking rollers in small increments. Do not place hands near moving belts.
+
+Boiler Low-Water Procedure. If the boiler low-water alarm activates, shut down the burner, verify the gauge glass, inspect the feedwater pump, and do not restart until the water level is restored and confirmed.
+
+CNC Spindle Overheat Guide. If the CNC spindle overheats, check coolant flow, inspect the spindle fan, verify lubrication, and pause machining until the temperature returns to the approved range.
+
+Forklift Battery Charging SOP. Before charging a forklift battery, park in a ventilated charging area, switch off the forklift, wear face and eye protection, and keep sparks or open flames away from the battery.
+
+Air Dryer Maintenance Note. If moisture appears in the compressed air line, check the dryer drain, inspect the desiccant condition, verify inlet temperature, and confirm the bypass valve is closed.
+
+Packaging Machine Jam Procedure. When the packaging machine jams, press emergency stop, isolate power if guards must be opened, remove jammed material with approved tools, and inspect sensors before restart.
+
+Cooling Tower Inspection Guide. During cooling tower inspection, check water level, inspect spray nozzles, verify fan operation, and remove debris from the basin. Do not enter the fan area while the fan is energized.
+
+Welding Fume Extraction SOP. Before welding in the booth, start the fume extractor, confirm airflow at the hood, inspect the filter indicator, and keep the hood close to the weld area.
+
+Chemical Mixing Safety SOP. Before chemical mixing, verify the material label, review the safety data sheet, wear chemical gloves and goggles, and add acid to water when dilution is required. Never add water to concentrated acid.
+
+Emergency Shower Inspection Note. Emergency showers must be tested weekly for clear flow, accessible path, visible signage, and correct drainage. Blocked access must be corrected immediately.
+
+Pallet Stacker Fault Guide. If the pallet stacker will not lift, check battery charge, inspect the lift chain, verify the emergency stop is released, and check hydraulic fluid level.
+
+Dust Collector Maintenance SOP. If dust collector suction drops, inspect the filter bags, check the differential pressure gauge, empty the dust bin, and verify the fan belt tension.
+
+Industrial Oven Temperature SOP. If oven temperature is unstable, inspect the door seal, verify thermocouple placement, check circulation fan operation, and review controller setpoint settings.
+
+Robotic Cell Entry Procedure. Before entering a robotic cell, place the robot in teach mode, apply lockout where required, verify reduced speed, and confirm the enabling device works. Automatic mode is not allowed during entry.
+
+Fire Pump Weekly Test. During the weekly fire pump test, verify suction pressure, discharge pressure, controller status, and automatic start signal. Report abnormal noise or vibration immediately.
+
+Generator Startup SOP. Before starting the backup generator, check fuel level, inspect oil level, verify coolant level, and ensure the output breaker is open until the generator reaches stable voltage and frequency.
+
+Warehouse Dock Door Safety. If a dock door is damaged or does not close fully, tag it out of service, inspect the tracks, check spring tension, and do not operate until repairs are complete.
+
+Water Treatment Filter Backwash. Backwash the sand filter when differential pressure exceeds the limit, the outlet flow drops, or turbidity rises. Confirm valves are returned to normal position after backwash.
+
+Pressure Vessel Inspection Note. Before pressure vessel inspection, depressurize the vessel, drain contents, verify zero pressure, and open vents. Inspection is not allowed while the vessel remains pressurized.
+
+Cleanroom Air Handling SOP. If particle counts rise, check prefilters, verify HEPA differential pressure, inspect door seals, and confirm positive room pressure.
+
+Label Printer Troubleshooting Guide. If printed labels are faded, clean the printhead, check ribbon installation, verify darkness setting, and inspect label stock compatibility.
+
+Industrial Network Cabinet SOP. Before working inside a network cabinet, identify connected equipment, avoid bending fiber cables, maintain labeling, and do not disconnect active uplinks without approval.
+
+Quality Inspection Gauge Control. Measurement gauges must be calibrated before expiry, stored in protective cases, and removed from service if dropped or damaged.
+
+Crane Pendant Control Safety. Before using an overhead crane, inspect the pendant, test the emergency stop, verify hook latch condition, and keep personnel clear of suspended loads.
+
+Paint Booth Ventilation SOP. Before spraying paint, start booth ventilation, verify airflow indicator, wear the required respirator, and confirm filters are not overloaded.
+
+Refrigeration Leak Response. If ammonia odor is detected near refrigeration equipment, evacuate the area, notify trained responders, start ventilation if safe, and do not enter without proper protection.
+
+Machine Guarding Rule. Machines must not operate with missing or bypassed guards. Guards may only be removed after isolation and must be replaced before restart.
+
+Hot Work Permit Procedure. Hot work requires an approved permit, removal of combustibles, fire watch assignment, and inspection after work is complete.
+
+Confined Space Entry SOP. Confined space entry requires atmospheric testing, an entry permit, attendant assignment, rescue plan review, and continuous monitoring when required.
+
+Electrical Arc Flash PPE Note. Arc flash work requires the correct PPE category, shock boundary review, insulated tools, and energized work approval when de-energizing is not possible.
+
+Lubrication Route Instruction. Bearings on Line 3 must be lubricated every 500 operating hours using the specified high-temperature grease. Over-greasing can damage seals.
+
+Steam Trap Inspection Guide. A failed-open steam trap may cause continuous steam loss, high condensate temperature, and unusual noise. A failed-closed trap may cause poor heating and water hammer.
+
+PLC Cabinet Cooling Note. If PLC cabinet temperature rises, inspect the cabinet fan, clean intake filters, verify door seals, and check that heat-generating devices are not overloaded.
+
+Material Hoist Safety SOP. Do not ride a material hoist unless it is rated for personnel. Inspect gate interlocks, wire rope condition, and limit switches before use.
+
+Torque Tool Verification Procedure. Torque tools must be verified at the start of each shift, after dropping, and after any repair. Failed tools must be removed from production.
+
+Production Line Changeover SOP. During changeover, confirm product code, update machine settings, install correct tooling, verify guards, and run first-piece inspection before full production.
+
+Oil Leak Response Guide. If an oil leak is found, place absorbent pads, identify the source, isolate equipment if safe, and clean the spill before restarting.
+
