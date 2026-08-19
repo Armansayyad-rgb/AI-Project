@@ -76,3 +76,14 @@ Bad claim:
 Good claim:
 
 > RALG is being evaluated against plain RAG. Current work is focused on retrieval quality, grounding, and domain-specific reliability.
+
+
+## Hard benchmark
+
+A harder benchmark with distractors, comparison cases, multi-hop-style questions, unsupported cases, and false-premise cases is available:
+
+```powershell
+python src\retrieval_proof_v1.py --dataset data\technical_doc_benchmark_hard_v1.jsonl --knowledge-file data\technical_docs_hard_sample.txt
+```
+
+This benchmark is designed to test whether query planning and merged retrieval provide value beyond the simpler baseline.
