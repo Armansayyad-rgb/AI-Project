@@ -1,8 +1,20 @@
 # API Demo Contract
 
-This is the proposed developer-facing API shape for RALG Engine.
+This is the developer-facing API shape for RALG Engine. A minimal FastAPI implementation is available at `src/api_server.py`.
 
 The current web UI is useful for manual demos, but pilots and technical buyers need an API contract so the engine can be tested from scripts and internal tools.
+
+## Run locally
+
+```bash
+uvicorn src.api_server:app --host 127.0.0.1 --port 8000
+```
+
+Health check:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
 
 ## Endpoint
 
@@ -44,14 +56,14 @@ Content-Type: application/json
 ## Curl example
 
 ```bash
-curl -X POST http://localhost:7860/query \
+curl -X POST http://127.0.0.1:8000/query \
   -H "Content-Type: application/json" \
   -d "{"question":"What safety step is required before opening the panel?","top_k":5}"
 ```
 
 ## Implementation target
 
-The first API implementation should:
+The current minimal API implementation should continue to:
 
 - reuse `rag_chat_v2.initialize_pipeline`
 - reuse `rag_chat_v2.answer_question`
