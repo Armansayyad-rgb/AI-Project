@@ -72,3 +72,42 @@ Needed additions:
 Minimum target before making strong claims:
 
 - RALG must beat baseline on at least one meaningful metric, or it should be described only as experimental.
+
+
+## Retrieval proof v1 — hard synthetic technical document benchmark
+
+Date: 2026-08-19  
+Command:
+
+```powershell
+python src\retrieval_proof_v1.py --dataset data\technical_doc_benchmark_hard_v1.jsonl --knowledge-file data\technical_docs_hard_sample.txt
+```
+
+Dataset:
+
+- 50 total cases
+- 39 supported technical-document questions
+- 11 unsupported / false-premise questions
+- distractor documents included
+- comparison and multi-evidence cases included
+- synthetic hard corpus at `data/technical_docs_hard_sample.txt`
+- corpus size: 51 chunks
+
+## Hard benchmark summary
+
+| System | Cases | Recall@1 | Recall@3 | Recall@5 | MRR | Unsupported rejection@5 | Accuracy@5 | Avg latency | P95 latency |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| baseline_v2 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 0.34 ms | 0.62 ms |
+| ralg_v4 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 2.19 ms | 5.55 ms |
+
+## Hard benchmark interpretation
+
+The hard benchmark is more useful than the first 50-case direct benchmark because Recall@1 dropped below 100%, meaning distractors are starting to matter.
+
+Current finding:
+
+- baseline_v2 and ralg_v4 still tie on all quality metrics
+- ralg_v4 remains slower
+- current query planning does not yet create a measurable retrieval advantage on this benchmark
+- the next engineering task is to inspect the Recall@1 misses and design cases or retrieval improvements where planned multi-query retrieval beats plain lexical retrieval
+
