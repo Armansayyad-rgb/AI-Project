@@ -97,8 +97,8 @@ Dataset:
 
 | System | Cases | Recall@1 | Recall@3 | Recall@5 | MRR | Unsupported rejection@5 | Accuracy@5 | Avg latency | P95 latency |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline_v2 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 0.34 ms | 0.62 ms |
-| ralg_v4 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 2.19 ms | 5.55 ms |
+| baseline_v2 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 0.33 ms | 0.52 ms |
+| ralg_v4 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 2.17 ms | 5.59 ms |
 
 ## Hard benchmark interpretation
 
@@ -111,3 +111,15 @@ Current finding:
 - current query planning does not yet create a measurable retrieval advantage on this benchmark
 - the next engineering task is to inspect the Recall@1 misses and design cases or retrieval improvements where planned multi-query retrieval beats plain lexical retrieval
 
+
+
+## V4.2 rerun note
+
+After commit `343ea0e` (RALG V4.2 multi-hop and false-premise changes), the hard benchmark was rerun. The quality metrics did not change on this synthetic hard benchmark:
+
+- baseline_v2 Recall@1: 0.9231
+- ralg_v4 Recall@1: 0.9231
+- both Accuracy@5: 1.00
+- ralg_v4 remains slower
+
+This means the current hard benchmark still does not expose a measurable RALG advantage.
