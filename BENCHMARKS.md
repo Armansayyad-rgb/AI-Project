@@ -25,8 +25,10 @@ Every benchmark should report:
 A first lightweight retrieval proof runner is available:
 
 ```bash
-python src/retrieval_proof_v1.py --dataset data/technical_doc_benchmark_v1.jsonl
+python src/retrieval_proof_v1.py --dataset data/technical_doc_benchmark_v1.jsonl --knowledge-file data/technical_docs_sample.txt
 ```
+
+A small synthetic sample corpus is included at `data/technical_docs_sample.txt` so the benchmark can run without private company files.
 
 It compares:
 
