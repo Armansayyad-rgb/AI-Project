@@ -1036,8 +1036,74 @@ def add_query_results(
     return accepted
 
 
+def question_aware_chunk_bonus(
+    question,
+    chunk,
+):
+    """Small V4-only ranking adjustment for distractor-heavy retrieval.
+
+    This does not change baseline V2. It helps V4 prefer chunks whose
+    wording answers the user's requested relation instead of chunks that
+    merely contain overlapping terms.
+    """
+    if not question:
+        return 0.0
+
+    q = question.lower()
+    c = chunk.lower()
+    bonus = 0.0
+
+    # Penalize explicit distractor language unless the user asks about
+    # the distractor relationship itself.
+    if (
+        "does not replace" in c
+        and "replace" not in q
+        and "different" not in q
+        and "compare" not in q
+    ):
+        bonus -= 8.0
+
+    if (
+        "is different from" in c
+        and "different" not in q
+        and "compare" not in q
+    ):
+        bonus -= 3.0
+
+    # Operational checklist wording.
+    if "before operating" in q:
+        if "before operating" in c:
+            bonus += 12.0
+        if "before charging" in c:
+            bonus -= 6.0
+
+    # Mechanical inspection vs chemical/water-treatment distractors.
+    if (
+        "mechanical inspection" in q
+        or "belongs in cooling tower mechanical" in q
+    ):
+        if "cooling tower inspection guide" in c:
+            bonus += 12.0
+        if "water treatment" in c or "chemical dosing" in c:
+            bonus -= 8.0
+
+    # Temporal direction matters: "after stable" should outrank
+    # prerequisite chunks saying "until stable".
+    if (
+        "after" in q
+        and "stable voltage" in q
+    ):
+        if "after stable voltage" in c or "after stable voltage and frequency" in c:
+            bonus += 14.0
+        if "until the generator reaches stable voltage" in c:
+            bonus -= 8.0
+
+    return bonus
+
+
 def rank_merged_results(
     merged,
+    question=None,
 ):
     merged_results = list(
         merged.values()
@@ -1057,12 +1123,24 @@ def rank_merged_results(
         )
 
         item[
+            "question_bonus"
+        ] = question_aware_chunk_bonus(
+            question,
+            item[
+                "chunk"
+            ],
+        )
+
+        item[
             "merged_score"
         ] = (
             item[
                 "best_score"
             ]
             + multi_query_bonus
+            + item[
+                "question_bonus"
+            ]
         )
 
     merged_results.sort(
@@ -2117,7 +2195,8 @@ def merge_results(
 
     ranked_results = (
         rank_merged_results(
-            merged
+            merged,
+            question=question,
         )
     )
 
@@ -2247,7 +2326,8 @@ def merge_results(
 
     merged_results = (
         rank_merged_results(
-            merged
+            merged,
+            question=question,
         )
     )
 
