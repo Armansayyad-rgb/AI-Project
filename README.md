@@ -113,7 +113,7 @@ http://localhost:7860
 
 Evaluation is part of the project, not an afterthought. The repo includes test suites for factual QA, unsupported questions, false-premise rejection, causal questions, comparisons, and multi-hop behavior.
 
-The next required milestone is a fair comparison between:
+A 50-case synthetic technical-document benchmark is included for first-pass retrieval proof. The next required milestone is a fair comparison between:
 
 - plain lexical RAG baseline
 - current RALG pipeline
