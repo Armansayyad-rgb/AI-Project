@@ -84,7 +84,6 @@ See:
 - [Use cases](docs/use_cases.md)
 - [Security](SECURITY.md)
 - [Commercial readiness](COMMERCIAL_READINESS.md)
-- [API Quickstart](docs/API_QUICKSTART.md)
 
 ## Quick start
 
@@ -110,22 +109,21 @@ Then open:
 http://localhost:7860
 ```
 
-### API-first local demo
+## Windows test runner
 
-RALG also ships a local HTTP API for embedding into other tools.
+After setup, run:
 
-```bash
-uvicorn src.api_server:app --host 127.0.0.1 --port 8000
+```powershell
+scripts\test_all.bat
 ```
 
-Endpoints:
+For API testing after starting the server:
 
-- `GET /health` — status check
-- `GET /stats` — pipeline stats (device, model_loaded, chunk_count, knowledge_files, uptime_seconds)
-- `POST /ingest` — add plain text to the running pipeline (chunks + rebuilds index)
-- `POST /query` — ask a question, returns answer, supported, confidence, answer_type, sources, latency_ms
+```powershell
+scripts\test_all.bat api
+```
 
-See [docs/API_QUICKSTART.md](docs/API_QUICKSTART.md) for full curl examples and a test script (`src/test_api_demo.py`).
+See [Windows Test Runner](docs/windows_test_runner.md).
 
 ## Evaluation
 

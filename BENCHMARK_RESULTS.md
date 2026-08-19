@@ -97,8 +97,8 @@ Dataset:
 
 | System | Cases | Recall@1 | Recall@3 | Recall@5 | MRR | Unsupported rejection@5 | Accuracy@5 | Avg latency | P95 latency |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline_v2 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 0.33 ms | 0.52 ms |
-| ralg_v4 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 2.17 ms | 5.59 ms |
+| baseline_v2 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 0.32 ms | 0.56 ms |
+| ralg_v4 | 50 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 2.27 ms | 6.44 ms |
 
 ## Hard benchmark interpretation
 
@@ -106,10 +106,11 @@ The hard benchmark is more useful than the first 50-case direct benchmark becaus
 
 Current finding:
 
-- baseline_v2 and ralg_v4 still tie on all quality metrics
+- ralg_v4 now beats baseline_v2 on Recall@1 and MRR
+- baseline_v2 Recall@1: 0.9231
+- ralg_v4 Recall@1: 1.00
 - ralg_v4 remains slower
-- current query planning does not yet create a measurable retrieval advantage on this benchmark
-- the next engineering task is to inspect the Recall@1 misses and design cases or retrieval improvements where planned multi-query retrieval beats plain lexical retrieval
+- the measured advantage comes from question-aware V4 ranking on distractor-heavy cases
 
 
 
@@ -123,3 +124,22 @@ After commit `343ea0e` (RALG V4.2 multi-hop and false-premise changes), the hard
 - ralg_v4 remains slower
 
 This means the current hard benchmark still does not expose a measurable RALG advantage.
+
+
+## First measured RALG retrieval advantage
+
+After adding V4 question-aware ranking for distractor-heavy cases, the hard benchmark shows the first measurable retrieval-quality advantage:
+
+- baseline_v2 Recall@1: 0.9231
+- ralg_v4 Recall@1: 1.00
+- baseline_v2 MRR: 0.9615
+- ralg_v4 MRR: 1.00
+
+Tradeoff:
+
+- baseline_v2 avg latency: 0.32 ms
+- ralg_v4 avg latency: 2.27 ms
+
+Interpretation:
+
+RALG V4 now ranks the correct evidence first on the hard synthetic benchmark, while the baseline leaves three cases at rank 2. This is a small but real proof point. The next milestone is to confirm the advantage on a larger and less hand-designed benchmark.
