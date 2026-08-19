@@ -84,6 +84,7 @@ See:
 - [Use cases](docs/use_cases.md)
 - [Security](SECURITY.md)
 - [Commercial readiness](COMMERCIAL_READINESS.md)
+- [API Quickstart](docs/API_QUICKSTART.md)
 
 ## Quick start
 
@@ -108,6 +109,23 @@ Then open:
 ```text
 http://localhost:7860
 ```
+
+### API-first local demo
+
+RALG also ships a local HTTP API for embedding into other tools.
+
+```bash
+uvicorn src.api_server:app --host 127.0.0.1 --port 8000
+```
+
+Endpoints:
+
+- `GET /health` — status check
+- `GET /stats` — pipeline stats (device, model_loaded, chunk_count, knowledge_files, uptime_seconds)
+- `POST /ingest` — add plain text to the running pipeline (chunks + rebuilds index)
+- `POST /query` — ask a question, returns answer, supported, confidence, answer_type, sources, latency_ms
+
+See [docs/API_QUICKSTART.md](docs/API_QUICKSTART.md) for full curl examples and a test script (`src/test_api_demo.py`).
 
 ## Evaluation
 
