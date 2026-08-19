@@ -17,19 +17,41 @@ Every benchmark should report:
 - RAM/VRAM usage
 - accuracy
 - support/grounding score
-- recall metrics
+- Recall@1, Recall@3, Recall@5, and MRR
 - failure examples
+
+## New proof runner
+
+A first lightweight retrieval proof runner is available:
+
+```bash
+python src/retrieval_proof_v1.py --dataset data/technical_doc_benchmark_v1.jsonl
+```
+
+It compares:
+
+- `baseline_v2`: existing lexical retrieval path
+- `ralg_v4`: query-planned RALG retrieval path
+
+It writes JSON results to:
+
+```text
+logs/retrieval_proof_v1_results.json
+```
+
+This runner does not require the trained generation checkpoint. It tests retrieval quality first, because weak retrieval makes answer generation unreliable no matter how good the final answer layer is.
 
 ## Required comparisons
 
 | Test | Purpose | Status |
 |---|---|---|
-| Plain lexical RAG baseline | Shows whether RALG improves over a simple retrieval pipeline | Needed |
-| Current RALG pipeline | Measures the actual project system | In progress |
-| Domain technical-doc benchmark | Tests the target startup use case | Needed |
-| Unsupported-question set | Measures abstention/refusal quality | Needed |
-| False-premise set | Measures resistance to wrong assumptions | Needed |
-| Latency and memory report | Shows practical deployability | Needed |
+| Plain lexical RAG baseline | Shows whether RALG improves over a simple retrieval pipeline | Added in `retrieval_proof_v1.py` |
+| Current RALG pipeline | Measures the actual project retrieval path | Added in `retrieval_proof_v1.py` |
+| Domain technical-doc benchmark | Tests the target startup use case | Seed JSONL added |
+| Unsupported-question set | Measures abstention/refusal quality | Seed cases added |
+| False-premise set | Measures resistance to wrong assumptions | Seed case added |
+| Latency report | Shows practical deployability | Added |
+| Memory report | Shows practical deployability | Still needed |
 
 ## Minimum public milestone
 
