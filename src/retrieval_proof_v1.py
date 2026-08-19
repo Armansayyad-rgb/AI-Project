@@ -67,6 +67,7 @@ class Case:
     expected_terms: list[str]
     supported: bool
     category: str = "general"
+    contradiction_terms: list[str] | None = None
 
 
 def _normalise(text: str) -> str:
@@ -76,6 +77,13 @@ def _normalise(text: str) -> str:
 def _contains_expected(text: str, expected_terms: Iterable[str]) -> bool:
     haystack = _normalise(text)
     return any(_normalise(term) in haystack for term in expected_terms if term)
+
+
+def _contains_contradiction(text: str, contradiction_terms: Iterable[str] | None) -> bool:
+    if not contradiction_terms:
+        return False
+    haystack = _normalise(text)
+    return any(_normalise(term) in haystack for term in contradiction_terms if term)
 
 
 def load_cases(path: Path) -> list[Case]:
@@ -93,6 +101,7 @@ def load_cases(path: Path) -> list[Case]:
                     expected_terms=list(raw.get("expected_terms") or []),
                     supported=bool(raw.get("supported", True)),
                     category=str(raw.get("category") or "general"),
+                    contradiction_terms=list(raw.get("contradiction_terms") or []),
                 )
             )
     return cases
@@ -157,10 +166,26 @@ def evaluate_system(name: str, cases: list[Case], chunks, index, document_freque
             if _contains_expected(text, case.expected_terms)
         ]
 
+        contradiction_ranks = [
+            rank
+            for rank, text in enumerate(texts, start=1)
+            if _contains_contradiction(text, case.contradiction_terms)
+        ]
+
         first_rank = ranks[0] if ranks else None
+        first_contradiction_rank = (
+            contradiction_ranks[0]
+            if contradiction_ranks
+            else None
+        )
+
         hit_at_1 = first_rank is not None and first_rank <= 1
         hit_at_3 = first_rank is not None and first_rank <= 3
         hit_at_5 = first_rank is not None and first_rank <= 5
+        contradiction_at_5 = (
+            first_contradiction_rank is not None
+            and first_contradiction_rank <= 5
+        )
 
         if case.supported:
             supported_total += 1
@@ -170,7 +195,10 @@ def evaluate_system(name: str, cases: list[Case], chunks, index, document_freque
             correct = hit_at_5
         else:
             unsupported_total += 1
-            correct = first_rank is None
+            # Unsupported questions are correct if retrieval finds no support.
+            # False-premise questions are also correct when the top evidence
+            # explicitly contradicts the premise, e.g. "do not allow X".
+            correct = first_rank is None or contradiction_at_5
             unsupported_correct += int(correct)
 
         rows.append(
@@ -180,6 +208,7 @@ def evaluate_system(name: str, cases: list[Case], chunks, index, document_freque
                 "question": case.question,
                 "supported": case.supported,
                 "first_rank": first_rank,
+                "first_contradiction_rank": first_contradiction_rank,
                 "correct": bool(correct),
                 "latency_ms": round(latency * 1000, 2),
                 "top_preview": texts[0][:220].replace("\n", " ") if texts else "",
