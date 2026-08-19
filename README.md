@@ -78,6 +78,7 @@ The most important work now is improving retrieval quality and publishing fair b
 See:
 
 - [Benchmarks](BENCHMARKS.md)
+- [Benchmark Results](BENCHMARK_RESULTS.md)
 - [Roadmap](ROADMAP.md)
 - [Architecture](docs/architecture.md)
 - [Use cases](docs/use_cases.md)
