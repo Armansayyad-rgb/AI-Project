@@ -6,7 +6,7 @@
 A local, evidence-grounded AI engine for answering questions over private documents with efficient retrieval, compact reasoning, and clear abstention when support is weak.
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/badge/License-Source--Available-orange)
 ![Status](https://img.shields.io/badge/Status-Active%20Development-blue)
 
 </div>
@@ -151,9 +151,13 @@ Known limitations:
 
 ## License
 
-This repository is currently released under the MIT License.
+RALG is released under the **RALG Source-Available Non-Commercial License v1.0**.
 
-If the project becomes a commercial product, proprietary deployment code, customer integrations, datasets, benchmarks, and private strategy material should be kept outside the public repository.
+You may use, study, modify, and redistribute the project free of charge under the license terms. Selling RALG, commercially redistributing it, offering it as a paid hosted/SaaS service, or presenting the project as your own work is not permitted without prior written permission from the copyright holder.
+
+This is a source-available license with commercial restrictions, not an OSI-approved open-source license. See [LICENSE](LICENSE) for the complete terms.
+
+Earlier versions that were already distributed under the MIT License remain subject to the rights granted with those versions; the current license applies to versions distributed under the new license.
 
 ## Positioning
 
