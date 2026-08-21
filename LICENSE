@@ -1,21 +1,65 @@
-MIT License
+RALG SOURCE-AVAILABLE NON-COMMERCIAL LICENSE v1.0
 
-Copyright (c) 2026 AI Project contributors
+Copyright (c) 2026 Arman Sayyad. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This license applies to RALG — Retrieval-Augmented Learning & Generation (the "Software") and to source code, documentation, and other materials distributed with this license, unless a specific file states otherwise.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. PERMITTED USE
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Subject to the conditions below, you are granted a worldwide, royalty-free, non-exclusive, non-transferable license to:
+
+- view and study the Software;
+- download and run the Software;
+- copy the Software for your own use;
+- modify the Software for personal, educational, academic, research, evaluation, or internal organizational use; and
+- redistribute original or modified copies free of charge, provided that this license, the copyright notice, and clear attribution to the RALG Project and Arman Sayyad are preserved.
+
+2. COMMERCIAL RESTRICTIONS
+
+Without prior written permission from the copyright holder, you may NOT:
+
+- sell, rent, lease, sublicense for a fee, or otherwise commercially redistribute the Software or a substantial portion of it;
+- charge for access to the Software itself or offer the Software as a paid hosted service, SaaS product, managed service, API, or substantially equivalent commercial offering;
+- include the Software as a material component of a product or service sold for money where the Software provides substantial product value;
+- remove, obscure, or alter copyright, license, or attribution notices;
+- represent the Software, RALG name, RALG technology, or substantially derived work as your original work; or
+- use the RALG name, branding, or trademarks in a way that implies endorsement, ownership, or official affiliation without permission.
+
+Commercial licensing, resale, hosted-service rights, OEM use, and other commercial permissions may be granted separately in writing by the copyright holder.
+
+3. MODIFICATIONS AND REDISTRIBUTION
+
+If you redistribute a modified version free of charge:
+
+- you must clearly state that the work is modified;
+- you must not imply that the modified version is an official RALG release;
+- you must retain this license and all copyright and attribution notices; and
+- you must not impose terms that remove the protections in this license.
+
+4. OWNERSHIP
+
+The Software is licensed, not sold. Copyright and ownership of the original RALG Software remain with the copyright holder. This license does not transfer ownership, trademark rights, patent rights, or any other intellectual-property rights except for the limited permissions expressly granted above.
+
+5. NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, ACCURACY, RELIABILITY, OR FITNESS FOR A PARTICULAR USE.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE.
+
+6. TERMINATION
+
+Your rights under this license terminate automatically if you violate its terms. Upon termination, you must stop exercising the rights granted by this license and stop distributing affected copies, except where otherwise required by law.
+
+7. SEPARATE COMMERCIAL LICENSES
+
+The copyright holder may offer separate commercial licenses under different terms. Receiving this source-available license does not grant commercial rights.
+
+8. PRIOR VERSIONS
+
+This license applies to versions and commits distributed under it. It does not retroactively revoke permissions that may have been granted for earlier versions under a different license.
+
+9. NOT AN OPEN-SOURCE LICENSE
+
+This is a source-available license with commercial restrictions. It is not intended to qualify as an Open Source Initiative (OSI)-approved open-source license.
+
+For commercial licensing or written permission, contact the RALG Project copyright holder through the official repository owner account.
