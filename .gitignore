@@ -91,8 +91,10 @@ README_AI_PROJECT*.md
 Thumbs.db
 desktop.ini
 
-# Generated data (large JSONL training files)
-data/*.jsonl
+# Generated training/model data. Benchmark JSONL files are intentionally
+# versioned for reproducibility and therefore are NOT ignored globally.
+data/generated/
+data/training/
 data/*.pt
 
 # Claude Code project state
