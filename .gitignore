@@ -98,3 +98,17 @@ data/*.pt
 # Claude Code project state
 .claude/
 CLAUDE.md
+
+# JavaScript dependencies
+node_modules/
+
+# Generated benchmark, diagnostic, and smoke-test output
+benchmark*_output.txt
+diag*_output.txt
+eval*_output.txt
+smoke*_output.txt
+targeted_benchmark_output.txt
+diagnostics/
+benchmark_v4_results.json
+reliability_benchmark_results.json
+eval_*.txt
