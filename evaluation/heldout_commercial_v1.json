@@ -1,0 +1,80 @@
+{
+  "name": "heldout_commercial_v1",
+  "description": "Synthetic Lumen ARC-12 service documents authored for this checkpoint. The domain, identifiers, values, and questions are independent of the existing RALG benchmark suites.",
+  "documents": [
+    {
+      "name": "lumen_arc12_startup",
+      "text": "LUMEN ARC-12 VACUUM KILN STARTUP CARD. Set chamber purge pressure to 3.7 bar. Use only Vireo-22 coolant. Before opening the service hatch, isolate disconnect K-41 and verify zero voltage at terminal J3."
+    },
+    {
+      "name": "lumen_arc12_alarms",
+      "text": "LUMEN ARC-12 ALARM GUIDE. For an amber FEED-LOW alarm, inspect screen F-9 and verify valve V-12 is fully open. For a crimson TEMP-HIGH alarm, stop the cycle, keep circulation running, and notify the shift lead."
+    },
+    {
+      "name": "lumen_arc12_restart",
+      "text": "LUMEN ARC-12 RESTART CARD. After service, close the hatch, remove all tools, hold RESET for four seconds, run the kiln idle for 75 seconds, and record outlet temperature in the service log."
+    }
+  ],
+  "cases": [
+    {
+      "id": "supported_pressure",
+      "question": "What purge pressure is required for the Lumen ARC-12 kiln?",
+      "supported": true,
+      "required_answer_groups": [["3.7 bar"]],
+      "required_source_terms": ["3.7 bar", "LUMEN ARC-12"]
+    },
+    {
+      "id": "supported_coolant",
+      "question": "Which coolant is approved for the Lumen ARC-12?",
+      "supported": true,
+      "required_answer_groups": [["Vireo-22"]],
+      "required_source_terms": ["Vireo-22", "LUMEN ARC-12"]
+    },
+    {
+      "id": "supported_safety",
+      "question": "What must be done before opening the ARC-12 service hatch?",
+      "supported": true,
+      "required_answer_groups": [["K-41", "disconnect"], ["zero voltage"], ["J3"]],
+      "required_source_terms": ["K-41", "zero voltage", "J3"]
+    },
+    {
+      "id": "supported_alarm",
+      "question": "What should be checked for an amber FEED-LOW alarm?",
+      "supported": true,
+      "required_answer_groups": [["F-9", "screen"], ["V-12", "valve"]],
+      "required_source_terms": ["FEED-LOW", "F-9", "V-12"]
+    },
+    {
+      "id": "supported_restart",
+      "question": "What are the ARC-12 restart steps after service?",
+      "supported": true,
+      "required_answer_groups": [["close the hatch"], ["remove all tools"], ["four seconds", "4 seconds"], ["75 seconds"], ["service log"]],
+      "required_source_terms": ["RESET", "75 seconds", "service log"]
+    },
+    {
+      "id": "unsupported_warranty",
+      "question": "How long is the ARC-12 warranty?",
+      "supported": false
+    },
+    {
+      "id": "unsupported_phone",
+      "question": "What is the supplier phone number for Vireo-22 coolant?",
+      "supported": false
+    },
+    {
+      "id": "unsupported_serial",
+      "question": "What is the serial number of the installed ARC-12 kiln?",
+      "supported": false
+    },
+    {
+      "id": "unsupported_price",
+      "question": "What was the purchase price of the ARC-12 kiln?",
+      "supported": false
+    },
+    {
+      "id": "unsupported_approver",
+      "question": "Who approved the current ARC-12 document revision?",
+      "supported": false
+    }
+  ]
+}
