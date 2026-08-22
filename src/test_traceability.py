@@ -92,6 +92,34 @@ class TraceabilityTests(unittest.TestCase):
         self.assertFalse(payload["supported"])
         self.assertFalse(is_traceable_support(generated["answer"], False, unrelated))
 
+    def test_supported_semantics_do_not_depend_on_source_display(self):
+        generated = {
+            "answer": "The pump requires isolation at the main disconnect.",
+            "supported": True,
+            "answer_type": "procedural",
+        }
+        grounded = [
+            {
+                "rank": 1,
+                "id": 7,
+                "preview": "The pump requires isolation at the main disconnect.",
+                "evidence": "The pump requires isolation at the main disconnect before service.",
+                "score": 10.0,
+            }
+        ]
+        with patch.object(api_server, "answer_question", return_value=generated), patch.object(
+            api_server, "collect_sources", return_value=grounded
+        ):
+            payload = self.client.post(
+                "/query",
+                json={
+                    "question": "What is required before pump service?",
+                    "include_sources": False,
+                },
+            ).json()
+        self.assertTrue(payload["supported"], payload)
+        self.assertEqual(payload["sources"], [])
+
     def test_unsupported_answer_is_not_grounded(self):
         payload = self.client.post(
             "/query", json={"question": "How did DNA cause the Roman Empire?"}
