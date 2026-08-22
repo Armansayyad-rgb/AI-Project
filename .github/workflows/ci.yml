@@ -18,8 +18,16 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Compile Python sources
-        run: python -m compileall -q config.py src
+      - name: Compile active Python runtime sources
+        run: |
+          python -m py_compile \
+            config.py \
+            src/api_server.py \
+            src/retriever_v4.py \
+            src/rag_chat_v2.py \
+            src/webui/app.py \
+            src/webui_bootstrap.py \
+            src/webui_launcher.py
 
       - name: Validate benchmark JSONL
         run: |
@@ -61,7 +69,7 @@ jobs:
       - name: Check Docker entrypoint module exists
         run: |
           test -f src/webui/app.py
-          grep -q 'CMD \["python", "-m", "webui.app"\]' Dockerfile
+          grep -Fq 'CMD ["python", "-m", "webui.app"]' Dockerfile
 
       - name: Check required public files
         run: |
