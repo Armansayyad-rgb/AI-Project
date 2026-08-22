@@ -25,7 +25,40 @@ _TRACEABILITY_STOPWORDS = {
     "would", "your", "what", "when", "where", "who", "why", "how",
     "answer", "following", "several", "important", "ways", "main", "was",
     "are", "and", "the", "for", "not", "but", "its", "all", "can", "also",
+    "is", "to", "of", "in", "on", "at", "be", "as", "by", "or",
 }
+_CONFLICT_ACTION_OPPOSITES = {
+    "open": "close", "close": "open", "start": "stop", "stop": "start",
+    "enable": "disable", "disable": "enable", "connect": "disconnect",
+    "disconnect": "connect", "install": "remove", "remove": "install",
+    "increase": "decrease", "decrease": "increase", "raise": "lower",
+    "lower": "raise", "attach": "detach", "detach": "attach",
+}
+_CONFLICT_NUMBER_RE = re.compile(
+    r"(?<![\w-])(?P<value>\d+(?:\.\d+)?)(?:\s*(?P<unit>[a-z%°][a-z0-9%°/-]*))?",
+    re.IGNORECASE,
+)
+_CONFLICT_IDENTIFIER_RE = re.compile(
+    r"\b(?:[A-Z][A-Z0-9]*(?:[-/][A-Z0-9]+)+|[A-Z]{2,}\d+[A-Z0-9]*)\b"
+)
+_CONFLICT_DIRECTIVE_RE = re.compile(
+    r"\b(?P<polarity>must|should|required to|need to|do not|don't|never|avoid|"
+    r"prohibited|only)\b(?P<action>.{0,90})",
+    re.IGNORECASE,
+)
+_CONFLICT_ATTRIBUTE_TERMS = {
+    "amount", "date", "duration", "identifier", "limit", "number", "period",
+    "pressure", "price", "quantity", "revision", "serial", "temperature",
+    "time", "value", "version", "voltage", "warranty", "year",
+}
+_CONFLICT_IDENTIFIER_ATTRIBUTE_TERMS = {
+    "asset", "document", "identifier", "installed", "model", "revision",
+    "serial", "terminal", "unit", "version",
+}
+CONFLICT_RESPONSE = (
+    "I found conflicting evidence in the retrieved sources and cannot state "
+    "a single settled answer."
+)
 
 
 def _traceability_terms(text: str) -> set[str]:
@@ -54,6 +87,138 @@ def is_traceable_support(answer: str, supported: bool, sources: list[dict]) -> b
         return False
     required_terms = 1 if len(_traceability_terms(answer)) <= 4 else 2
     return evidence_overlap(answer, sources) >= required_terms
+
+
+def _source_evidence(source: dict) -> str:
+    return str(source.get("evidence") or source.get("preview") or "")
+
+
+def _relevant_source_pairs(question: str, sources: list[dict]) -> list[tuple[str, str]]:
+    if len(sources) < 2:
+        return []
+    scored = [source.get("score") for source in sources]
+    numeric_scores = [float(score) for score in scored if isinstance(score, (int, float))]
+    if numeric_scores:
+        floor = max(numeric_scores) * 0.7
+        selected = [
+            _source_evidence(source)
+            for source in sources
+            if isinstance(source.get("score"), (int, float))
+            and float(source["score"]) >= floor
+        ]
+    else:
+        selected = [_source_evidence(source) for source in sources]
+    question_terms = _traceability_terms(question)
+    pairs = []
+    for index, left in enumerate(selected):
+        left_terms = _traceability_terms(left)
+        if not question_terms.intersection(left_terms):
+            continue
+        for right in selected[index + 1 :]:
+            right_terms = _traceability_terms(right)
+            if question_terms.intersection(right_terms):
+                pairs.append((left, right))
+    return pairs
+
+
+def _context_terms(text: str, start: int, end: int) -> set[str]:
+    window = text[max(0, start - 90) : min(len(text), end + 90)]
+    return _traceability_terms(window)
+
+
+def _numeric_conflict(left: str, right: str) -> bool:
+    left_values = [
+        (match.group("value"), (match.group("unit") or "").casefold(),
+         _context_terms(left, match.start(), match.end()))
+        for match in _CONFLICT_NUMBER_RE.finditer(left)
+    ]
+    right_values = [
+        (match.group("value"), (match.group("unit") or "").casefold(),
+         _context_terms(right, match.start(), match.end()))
+        for match in _CONFLICT_NUMBER_RE.finditer(right)
+    ]
+    for left_value, left_unit, left_context in left_values:
+        for right_value, right_unit, right_context in right_values:
+            if left_value == right_value or left_unit != right_unit:
+                continue
+            shared_context = left_context & right_context
+            if len(shared_context) < 2:
+                continue
+            if left_unit and left_unit not in {"ad", "bc"}:
+                return True
+            if shared_context & _CONFLICT_ATTRIBUTE_TERMS:
+                return True
+    return False
+
+
+def _identifier_conflict(left: str, right: str) -> bool:
+    left_matches = list(_CONFLICT_IDENTIFIER_RE.finditer(left))
+    right_matches = list(_CONFLICT_IDENTIFIER_RE.finditer(right))
+    left_ids = {match.group().casefold() for match in left_matches}
+    right_ids = {match.group().casefold() for match in right_matches}
+    differing_left = left_ids - right_ids
+    differing_right = right_ids - left_ids
+    if not differing_left or not differing_right:
+        return False
+    left_context = set().union(
+        *(_context_terms(left, match.start(), match.end())
+          for match in left_matches
+          if match.group().casefold() in differing_left)
+    )
+    right_context = set().union(
+        *(_context_terms(right, match.start(), match.end())
+          for match in right_matches
+          if match.group().casefold() in differing_right)
+    )
+    return bool(
+        left_context
+        & right_context
+        & _CONFLICT_IDENTIFIER_ATTRIBUTE_TERMS
+    )
+
+
+def _directive_conflict(left: str, right: str) -> bool:
+    left_directives = []
+    right_directives = []
+    for text, target in ((left, left_directives), (right, right_directives)):
+        for match in _CONFLICT_DIRECTIVE_RE.finditer(text):
+            polarity = match.group("polarity").casefold()
+            action_terms = _traceability_terms(match.group("action"))
+            target.append((polarity, action_terms))
+    for left_polarity, left_action in left_directives:
+        for right_polarity, right_action in right_directives:
+            if not left_action or not right_action:
+                continue
+            shared_action = left_action & right_action
+            opposite_action = any(
+                _CONFLICT_ACTION_OPPOSITES.get(term) in right_action
+                for term in left_action
+                if term in _CONFLICT_ACTION_OPPOSITES
+            )
+            action_verbs = set(_CONFLICT_ACTION_OPPOSITES)
+            shared_object = (left_action & right_action) - action_verbs
+            negative_polarities = {"do not", "don't", "never", "avoid"}
+            opposite_polarity = (
+                (left_polarity in negative_polarities)
+                != (right_polarity in negative_polarities)
+            )
+            if (opposite_action and len(shared_object) >= 2) or (
+                shared_action and opposite_polarity
+            ):
+                return True
+    return False
+
+
+def detect_evidence_conflict(question: str, sources: list[dict]) -> bool:
+    """Detect materially conflicting claims among high-relevance evidence."""
+    for left, right in _relevant_source_pairs(question, sources):
+        if _numeric_conflict(left, right):
+            return True
+        if _identifier_conflict(left, right):
+            return True
+        if _directive_conflict(left, right):
+            return True
+    return False
 
 
 def _format_v2_sources(results: list[dict], limit: int) -> list[dict]:
@@ -188,6 +353,7 @@ def chat_turn(
     supported = is_traceable_support(
         str(result.get("answer", "")), bool(result.get("supported", False)), sources
     )
+    conflict = supported and detect_evidence_conflict(question, sources)
 
     confidence = result.get("confidence")
     if isinstance(confidence, (int, float)):
@@ -197,10 +363,10 @@ def chat_turn(
 
     return {
         "question": question,
-        "answer": result.get("answer", ""),
+        "answer": CONFLICT_RESPONSE if conflict else result.get("answer", ""),
         "confidence": confidence,
-        "supported": supported,
-        "answer_type": result.get("answer_type", "unknown"),
+        "supported": False if conflict else supported,
+        "answer_type": "conflict" if conflict else result.get("answer_type", "unknown"),
         "intent": intent,
         "sources": sources,
         "error": None,
