@@ -20,6 +20,15 @@ DATASET = PROJECT_ROOT / "evaluation" / "heldout_commercial_v1.json"
 OUTPUT = PROJECT_ROOT / "logs" / "heldout_commercial_v1_results.json"
 ABSTENTION_TEXT = "couldn't find enough reliable evidence"
 
+# This small held-out set is a regression/release gate, not a production claim.
+# Because every case is intentionally deterministic, any quality regression is
+# treated as a failing command rather than merely printed as a warning.
+REQUIRED_RETRIEVAL_CORRECTNESS = 1.0
+REQUIRED_ANSWER_COMPLETENESS = 1.0
+REQUIRED_UNSUPPORTED_REJECTION = 1.0
+REQUIRED_SAFE_ABSTENTION = 1.0
+MAX_FALSE_SUPPORT_RATE = 0.0
+
 
 def contains(text: str, term: str) -> bool:
     return term.casefold() in text.casefold()
@@ -31,6 +40,17 @@ def percentile_95(values: list[float]) -> float:
     ordered = sorted(values)
     index = max(0, min(len(ordered) - 1, round(0.95 * (len(ordered) - 1))))
     return ordered[index]
+
+
+def quality_gate_passes(metrics: dict) -> bool:
+    return (
+        metrics["runtime_errors"] == 0
+        and metrics["retrieval_correctness"] >= REQUIRED_RETRIEVAL_CORRECTNESS
+        and metrics["answer_completeness"] >= REQUIRED_ANSWER_COMPLETENESS
+        and metrics["unsupported_rejection"] >= REQUIRED_UNSUPPORTED_REJECTION
+        and metrics["safe_abstention"] >= REQUIRED_SAFE_ABSTENTION
+        and metrics["false_support_rate"] <= MAX_FALSE_SUPPORT_RATE
+    )
 
 
 def main() -> int:
@@ -55,7 +75,9 @@ def main() -> int:
         payload = response.json()
         answer = payload.get("answer") or ""
         sources = payload.get("sources") or []
-        source_text = " ".join(source.get("preview") or "" for source in sources)
+        source_text = " ".join(
+            source.get("evidence") or source.get("preview") or "" for source in sources
+        )
 
         expected_supported = bool(case["supported"])
         actual_supported = bool(payload.get("supported"))
@@ -106,6 +128,7 @@ def main() -> int:
         "p95_latency_ms": percentile_95(latencies),
         "runtime_errors": sum(item["error"] is not None for item in results),
     }
+    metrics["quality_gate_passed"] = quality_gate_passes(metrics)
     report = {"metrics": metrics, "results": results}
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -118,7 +141,10 @@ def main() -> int:
             f"abstained={item['safely_abstained']} latency_ms={item['latency_ms']:.2f}"
         )
     print(f"results={OUTPUT}")
-    return 0 if metrics["runtime_errors"] == 0 else 1
+    if not metrics["quality_gate_passed"]:
+        print("COMMERCIAL VALIDATION QUALITY GATE FAILED", file=sys.stderr)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
