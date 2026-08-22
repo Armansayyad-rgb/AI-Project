@@ -4,9 +4,13 @@ This document describes the public readiness criteria for RALG without exposing 
 
 ## Current stage
 
-RALG is an early technical proof with a working local pipeline, document ingestion, web UI, API, Docker support, and evaluation tooling.
+RALG is an early technical proof with a working local pipeline, document ingestion, web UI, API, Docker support, evaluation tooling, and a reproducible held-out commercial validation runner.
 
-It is **not yet production-ready** and should not be presented as having proven superiority over conventional RAG systems.
+The latest validated checkpoint demonstrates correct retrieval and complete answers on 5 supported synthetic held-out cases, safe rejection on 5 unsupported cases, a 0% false-support rate on that small set, 23/23 regression passes, and a passing GitHub Actions sanity workflow on `master`.
+
+These are engineering checkpoints, not production claims. RALG is **not yet production-ready** and should not be presented as having proven superiority over conventional RAG systems.
+
+See [Customer Pilot Readiness](PILOT_READINESS.md) for the explicit release gates before an external pilot.
 
 ## What is already demonstrated
 
@@ -15,8 +19,11 @@ It is **not yet production-ready** and should not be presented as having proven 
 - unsupported / false-premise rejection paths
 - repeatable synthetic retrieval benchmarks
 - a hard benchmark with distractors and multi-evidence cases
+- a small held-out commercial validation set with supported and unsupported cases
+- runtime-ingested evidence tracking without hard-coded corpus-size assumptions
 - end-to-end API reliability testing
 - local web UI and Docker packaging
+- GitHub Actions CI with manual dispatch support
 
 ## Required before customer pilots
 
@@ -32,6 +39,7 @@ The following should be treated as release gates rather than marketing goals:
 - clear handling of malformed or oversized document uploads
 - documented security boundaries for local deployment
 - a fixed held-out evaluation set that is not tuned after failures are observed
+- a larger and more realistic evaluation set than the current small synthetic checkpoint
 
 ## Required before strong technical or investor claims
 

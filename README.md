@@ -72,9 +72,11 @@ This makes the project relevant for:
 
 ## Current status
 
-RALG is in active development. The system includes a working local pipeline, web UI, document ingestion, API, Docker packaging, and evaluation scripts.
+RALG is in active development. The system includes a working local pipeline, web UI, document ingestion, API, Docker packaging, evaluation scripts, and a reproducible held-out commercial validation runner.
 
-The most important work now is improving retrieval and end-to-end reliability and validating results on larger, less hand-designed data. Claims about superiority should be treated as unproven until they are reproduced on stable held-out evaluations.
+A recent small synthetic held-out checkpoint passed all 5 supported-answer cases for retrieval and completeness, rejected all 5 unsupported cases, produced a 0% false-support rate on that set, and preserved 23/23 regression passes. GitHub Actions CI has also been verified on `master`.
+
+Those results are engineering checkpoints, not proof of production performance. The most important work now is pilot hardening: larger realistic evaluation data, clean-install and Docker reproducibility, malformed/oversized input handling, evidence-traceability assertions, and representative RAM/VRAM and latency measurements.
 
 See:
 
@@ -87,6 +89,7 @@ See:
 - [Use cases](docs/use_cases.md)
 - [Security](SECURITY.md)
 - [Commercial readiness](COMMERCIAL_READINESS.md)
+- [Customer pilot readiness](PILOT_READINESS.md)
 
 ## Quick start
 
@@ -145,7 +148,7 @@ See [Windows Test Runner](docs/windows_test_runner.md).
 
 Evaluation is part of the project, not an afterthought. The repo includes tests for factual QA, unsupported questions, false-premise rejection, causal questions, comparisons, and multi-hop behavior.
 
-Two 50-case synthetic technical-document retrieval benchmarks are included: a direct set and a harder distractor/multi-evidence set. End-to-end API reliability is reported separately.
+Two 50-case synthetic technical-document retrieval benchmarks are included: a direct set and a harder distractor/multi-evidence set. End-to-end API reliability is reported separately. A small held-out commercial validation set is also included to test supported-answer completeness, safe abstention, false-support behavior, and latency after runtime ingestion.
 
 Published metrics should distinguish retrieval quality from answer reliability and include, where applicable:
 
@@ -164,8 +167,10 @@ RALG is not production-ready yet.
 
 Known limitations:
 
-- retrieval and runtime-ingested-document ranking are still being improved
-- current evaluation is primarily synthetic
+- current evaluation remains primarily synthetic and the held-out commercial set is small
+- clean-machine installation and Docker startup still need explicit release-gate verification
+- malformed and oversized upload behavior needs stronger automated coverage
+- RAM/VRAM and scale-dependent ingest/query performance need formal measurement
 - some runtime/research paths remain experimental
 - model/data provenance needs stronger documentation for commercial diligence
 - domain-specific validation is required before deployment
