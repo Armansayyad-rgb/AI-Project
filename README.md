@@ -34,6 +34,7 @@ The near-term goal is not broad general chat. The goal is reliable, cited answer
 - Conditional multi-hop retrieval with a maximum extra pass
 - PDF, DOCX, and TXT ingestion
 - Gradio web interface
+- Local FastAPI interface
 - CPU and CUDA support
 - Docker and Docker Compose support
 - Evaluation and regression tooling
@@ -71,16 +72,18 @@ This makes the project relevant for:
 
 ## Current status
 
-RALG is in active development. The system already includes a working local pipeline, web UI, document ingestion, Docker support, and evaluation scripts.
+RALG is in active development. The system includes a working local pipeline, web UI, document ingestion, API, Docker packaging, and evaluation scripts.
 
-The most important work now is improving retrieval quality and publishing fair benchmark results against a plain RAG baseline. Claims about superiority should be treated as unproven until benchmarked.
+The most important work now is improving retrieval and end-to-end reliability and validating results on larger, less hand-designed data. Claims about superiority should be treated as unproven until they are reproduced on stable held-out evaluations.
 
 See:
 
 - [Benchmarks](BENCHMARKS.md)
 - [Benchmark Results](BENCHMARK_RESULTS.md)
+- [Reliability Benchmark](RELIABILITY_BENCHMARK.md)
 - [Roadmap](ROADMAP.md)
 - [Architecture](docs/architecture.md)
+- [Repository Layout](docs/repository_layout.md)
 - [Use cases](docs/use_cases.md)
 - [Security](SECURITY.md)
 - [Commercial readiness](COMMERCIAL_READINESS.md)
@@ -95,12 +98,23 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Run the web UI from the project source entrypoint used by your environment.
+Run the web UI from the project root:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m webui.app
+```
+
+Run the local API from the project root:
+
+```powershell
+uvicorn src.api_server:app --host 127.0.0.1 --port 8000
+```
 
 ### Docker
 
 ```bash
-docker compose up
+docker compose up --build
 ```
 
 Then open:
@@ -108,6 +122,8 @@ Then open:
 ```text
 http://localhost:7860
 ```
+
+Model checkpoints are not stored in Git. If your chosen runtime path requires a checkpoint, provide it through the configured checkpoint directory or Docker volume.
 
 ## Windows test runner
 
@@ -127,15 +143,20 @@ See [Windows Test Runner](docs/windows_test_runner.md).
 
 ## Evaluation
 
-Evaluation is part of the project, not an afterthought. The repo includes test suites for factual QA, unsupported questions, false-premise rejection, causal questions, comparisons, and multi-hop behavior.
+Evaluation is part of the project, not an afterthought. The repo includes tests for factual QA, unsupported questions, false-premise rejection, causal questions, comparisons, and multi-hop behavior.
 
-A 50-case synthetic technical-document benchmark is included for first-pass retrieval proof. The next required milestone is a fair comparison between:
+Two 50-case synthetic technical-document retrieval benchmarks are included: a direct set and a harder distractor/multi-evidence set. End-to-end API reliability is reported separately.
 
-- plain lexical RAG baseline
-- current RALG pipeline
-- domain-specific technical-document benchmark
+Published metrics should distinguish retrieval quality from answer reliability and include, where applicable:
 
-Published metrics should include accuracy, support rate, recall, latency, RAM/VRAM usage, and failure examples.
+- accuracy and support/rejection rates
+- Recall@K and MRR
+- false-support examples
+- latency
+- RAM/VRAM usage
+- failure examples
+
+Synthetic benchmark success is an engineering checkpoint, not proof of production performance.
 
 ## Limitations
 
@@ -143,11 +164,11 @@ RALG is not production-ready yet.
 
 Known limitations:
 
-- retrieval quality still needs improvement
-- benchmark results are not yet strong enough for commercial claims
-- current evaluation needs cleaner public reporting
-- some paths are experimental
-- domain-specific validation is still required before deployment
+- retrieval and runtime-ingested-document ranking are still being improved
+- current evaluation is primarily synthetic
+- some runtime/research paths remain experimental
+- model/data provenance needs stronger documentation for commercial diligence
+- domain-specific validation is required before deployment
 
 ## License
 
