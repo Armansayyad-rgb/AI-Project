@@ -4,7 +4,7 @@ Use this after pulling the latest repo changes on Windows.
 
 ## Normal benchmark/compile test
 
-From `C:\AI-Project`:
+From the repository root:
 
 ```powershell
 scripts\test_all.bat
@@ -25,7 +25,7 @@ First start the API server:
 uvicorn src.api_server:app --host 127.0.0.1 --port 8000
 ```
 
-Then open another PowerShell in `C:\AI-Project` and run:
+Then open another PowerShell in the repository root and run:
 
 ```powershell
 scripts\test_all.bat api

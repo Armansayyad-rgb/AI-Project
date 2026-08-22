@@ -2,8 +2,8 @@
 
 Phase 1 + Phase 2. Run with::
 
-    cd C:\\AI-Project\\src
-    ..\\.venv\\Scripts\\python.exe -m webui_launcher
+    From the repository root, run ``python -m webui_launcher`` after setting
+    ``PYTHONPATH=src`` (or use the Docker Compose command).
 """
 
 from __future__ import annotations

@@ -2,8 +2,8 @@
 
 Usage::
 
-    cd C:\\AI-Project
-    .venv\\Scripts\\python.exe -m webui_launcher
+    From the repository root, run ``python -m webui_launcher`` with
+    ``PYTHONPATH=src`` configured.
 """
 
 from webui.app import main

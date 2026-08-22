@@ -2,16 +2,16 @@
 # Gradio/web-stack versions are pinned where compatibility is sensitive.
 
 # Core deep-learning stack (CPU-only is fine; CUDA is detected at runtime).
-torch>=2.7.1
+torch==2.7.1
 
 # BPE tokenizer used by the local reasoning model.
-tokenizers>=0.22.2,<=0.23.1
+tokenizers==0.23.1
 
 # Numerical utilities.
-numpy>=2.4.4,<3.0
+numpy==2.4.4
 
 # Used by src/download_corpus.py to pull the WikiText corpus from Hugging Face.
-datasets>=5.0.0,<6.0
+datasets==5.0.1
 
 # Gradio 4.44.1-compatible web stack.
 gradio==4.44.1
@@ -23,5 +23,5 @@ uvicorn==0.32.0
 huggingface_hub==0.26.1
 
 # Document upload pipeline.
-PyPDF2>=3.0.0
-python-docx>=1.0.0
+PyPDF2==3.0.1
+python-docx==1.2.0

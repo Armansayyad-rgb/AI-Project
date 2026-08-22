@@ -43,6 +43,7 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from rag_chat_v2 import answer_question, initialize_pipeline  # noqa: E402
+from config import DATA_DIR  # noqa: E402
 from webui.chat_handler import (  # noqa: E402
     CONFLICT_RESPONSE,
     collect_sources,
@@ -218,8 +219,8 @@ def health() -> dict[str, str]:
 def stats() -> StatsResponse:
     pipeline = get_pipeline()
     knowledge_files = [
-        str(p) for p in Path("data").glob("*.txt")
-    ] if Path("data").exists() else []
+        str(p) for p in DATA_DIR.glob("*.txt")
+    ] if DATA_DIR.exists() else []
     return StatsResponse(
         device=pipeline.get("device", "unknown"),
         model_loaded=pipeline.get("model") is not None,

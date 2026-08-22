@@ -1,7 +1,7 @@
 # RALG Engine - CPU-only Docker image.
 #
 # Build: docker build -t ralg-engine .
-# Run:   docker run -p 7860:7860 -v ralg_data:/app/data -v ralg_logs:/app/logs ralg-engine
+# Run:   docker run -p 7860:7860 -v ralg_data:/app/data/uploads -v ralg_logs:/app/logs ralg-engine
 
 FROM python:3.11-slim
 
@@ -19,7 +19,7 @@ COPY requirements.txt .
 
 # Install the CPU PyTorch wheel explicitly first. The later requirements
 # install sees the satisfied torch requirement and keeps this build CPU-only.
-RUN pip install --no-cache-dir --index-url ${TORCH_INDEX_URL} "torch>=2.7.1"
+RUN pip install --no-cache-dir --index-url ${TORCH_INDEX_URL} "torch==2.7.1"
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
