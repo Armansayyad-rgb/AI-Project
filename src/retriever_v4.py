@@ -6,6 +6,7 @@ from retriever_v2 import (
     load_chunks,
     build_index,
     retrieve as retrieve_v2,
+    RuntimeChunk,
 )
 
 from query_planner_v1 import (
@@ -913,6 +914,10 @@ def build_adaptive_query_plan(plan):
     }
 
 
+# Boost applied to runtime-ingested document chunks to prefer them over static KB
+INGESTED_CHUNK_BOOST = 5.0
+
+
 # --------------------------------------------------
 # Merge helpers
 # --------------------------------------------------
@@ -932,6 +937,12 @@ def add_query_results(
         chunk = result[
             "chunk"
         ]
+
+        ingested_boost = (
+            INGESTED_CHUNK_BOOST
+            if isinstance(result.get("chunk"), RuntimeChunk)
+            else 0.0
+        )
 
         key = normalize_text(
             chunk
@@ -969,6 +980,7 @@ def add_query_results(
             base_score
             + query_bonus
             + rank_bonus
+            + ingested_boost
         )
 
         if key not in merged:
