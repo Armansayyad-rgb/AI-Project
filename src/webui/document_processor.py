@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
-from retriever_v2 import build_index as build_index_v2
+from retriever_v2 import RuntimeChunk, build_index as build_index_v2
 
 
 SUPPORTED_EXTS = {".txt", ".pdf", ".docx"}
@@ -145,7 +145,7 @@ def attach_documents(
     for doc in uploaded:
         if not doc.chunks:
             doc.chunks = chunk_text(doc.text)
-        new_chunks.extend(doc.chunks)
+        new_chunks.extend(RuntimeChunk(chunk) for chunk in doc.chunks)
         doc.chunk_count = len(doc.chunks)
     if not new_chunks:
         return 0

@@ -20,6 +20,13 @@ LEXICAL_TOP_K = 20
 FACTUAL_TOP_K = 120
 FINAL_TOP_K = 5
 
+# Boost applied to runtime-ingested document chunks to prefer them over static KB
+INGESTED_CHUNK_BOOST = 5.0
+
+
+class RuntimeChunk(str):
+    """String-compatible chunk marker for explicitly ingested content."""
+
 
 STOPWORDS = {
     "the", "a", "an", "and", "or", "but",
@@ -590,9 +597,16 @@ def retrieve_candidates(
                 )
             )
 
+        ingested_boost = (
+            INGESTED_CHUNK_BOOST
+            if isinstance(chunks[i], RuntimeChunk)
+            else 0.0
+        )
+
         candidate_score = (
             lexical
             + factual_bonus
+            + ingested_boost
         )
 
         if candidate_score > 0:

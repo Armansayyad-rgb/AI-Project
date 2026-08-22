@@ -62,6 +62,7 @@ FACTUAL_STARTS = (
     "where ",
     "what ",
     "which ",
+    "how long ",
 )
 
 
@@ -621,6 +622,43 @@ def _predicate_answers_question(
     return False
 
 
+def _named_fact_anchors_match(question, candidate_sentence):
+    """Return whether a named operational fact is grounded, or None.
+
+    The check applies only when the question contains an explicit
+    hyphenated/alphanumeric identifier.  Such questions need both that
+    identifier and a requested attribute in the same evidence sentence.
+    """
+    identifiers = {
+        token.lower()
+        for token in re.findall(
+            r"\b(?:[A-Z][A-Za-z0-9]*-[A-Za-z0-9-]+|[A-Z]+\d+[A-Za-z0-9-]*)\b",
+            question,
+        )
+    }
+    if not identifiers:
+        return None
+
+    ignored = {
+        "what", "which", "how", "long", "is", "are", "was", "were",
+        "the", "a", "an", "for", "of", "to", "in", "on", "at", "and",
+        "be", "must", "should", "after", "before", "current",
+    }
+    requested_terms = [
+        token
+        for token in re.findall(r"[a-z0-9]+(?:-[a-z0-9]+)?", question.lower())
+        if token not in ignored and token not in identifiers and len(token) > 2
+    ]
+    if not requested_terms:
+        return None
+
+    low = candidate_sentence.lower()
+    return (
+        any(term in low for term in requested_terms[:2])
+        and any(identifier in low for identifier in identifiers)
+    )
+
+
 def extract_factual_answer(question, context):
     """
     Extract a factual answer from context for who/when/where/what/which questions.
@@ -642,9 +680,15 @@ def extract_factual_answer(question, context):
             if not _predicate_answers_question(
                 question, extracted, context
             ):
-                return None, False
-            return extracted, True
-        return None, False
+                extracted = None
+            elif (
+                not (
+                    extracted.isupper()
+                    and len(extracted.split()) <= 8
+                )
+                and _named_fact_anchors_match(question, extracted) is not False
+            ):
+                return extracted, True
 
     # Fallback: pattern-based extraction for common factual patterns
     if q.startswith("when "):
@@ -805,6 +849,8 @@ def extract_factual_answer(question, context):
                     question, s, context
                 ):
                     continue
+                if _named_fact_anchors_match(question, s) is False:
+                    continue
                 return s, True
             low = s.lower()
             if any(
@@ -814,6 +860,8 @@ def extract_factual_answer(question, context):
                 if not _predicate_answers_question(
                     question, s, context
                 ):
+                    continue
+                if _named_fact_anchors_match(question, s) is False:
                     continue
                 return s, True
         return None, False
@@ -827,6 +875,21 @@ def extract_factual_answer(question, context):
                 ):
                     continue
                 return loc, True
+
+    # General operational facts often use forms such as "What purge
+    # pressure..." or "Which coolant..." rather than "What is...".
+    # Accept a complete evidence sentence only when it contains both a
+    # requested attribute and the question's explicit identifier.  The
+    # two anchors prevent an unrelated sentence about (for example) a
+    # phone number or price from being treated as support.
+    if q.startswith(("what ", "which ", "how long ")):
+        sentences = _split_sentences(context)
+        for index, sentence in enumerate(sentences):
+            if sentence.isupper() and len(sentence.split()) <= 8:
+                continue
+            evidence_window = " ".join(sentences[max(0, index - 3): index + 1])
+            if _named_fact_anchors_match(question, evidence_window):
+                return sentence, True
 
     return None, False
 
@@ -3611,6 +3674,22 @@ def _answer_question_impl(
     else:
         reasoning_context = aggregated_context
 
+    # The ranked result list can contain a complete, high-quality document
+    # chunk even when the compact aggregated context selected a neighboring
+    # sentence. For named factual questions, add only chunks that satisfy
+    # the same identifier/attribute grounding check; unrelated chunks cannot
+    # weaken the unsupported-answer gate.
+    if is_factual_question(question):
+        grounded_chunks = []
+        for item in (retrieval or {}).get("results", []):
+            chunk = item.get("chunk", "") if isinstance(item, dict) else ""
+            if chunk and _named_fact_anchors_match(question, chunk):
+                grounded_chunks.append(chunk)
+        if grounded_chunks:
+            reasoning_context = (
+                "\n".join(grounded_chunks) + "\n" + reasoning_context
+            ).strip()
+
     # --- Factual QA path (conditional, lightweight) ---
     # Only for questions with NO specialized reasoning intent.
     # Specialized intents (cause / change / effect / comparison /
@@ -4648,4 +4727,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
