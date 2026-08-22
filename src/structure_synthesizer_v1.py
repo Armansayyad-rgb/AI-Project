@@ -844,6 +844,26 @@ def compress_structure_sentence(
     sentence,
     subject,
 ):
+    original = capitalize_sentence(
+        normalize(sentence)
+    )
+
+    def preserves_content(compressed):
+        source_terms = sentence_signature(
+            original
+        )
+        compressed_terms = sentence_signature(
+            compressed
+        )
+
+        if not source_terms:
+            return True
+
+        return (
+            len(source_terms & compressed_terms)
+            / len(source_terms)
+        ) >= 0.65
+
     subject_lower = (
         clean_subject(
             subject
@@ -859,7 +879,9 @@ def compress_structure_sentence(
         )
 
         if result:
-            return result
+            if preserves_content(result):
+                return result
+            return original
 
         # Fall back to a clean capitalized
         # sentence for Roman-military
@@ -883,7 +905,9 @@ def compress_structure_sentence(
         )
 
         if result:
-            return result
+            if preserves_content(result):
+                return result
+            return original
 
         return None
 
