@@ -1,23 +1,14 @@
-"""
-Centralized configuration for the AI-Project RAG chat pipeline.
+"""Centralized configuration for the RALG pipeline.
 
-All paths and runtime settings live here so callers can override them
-through environment variables without editing source files. This module
-works the same on Windows, Linux, and macOS - only defaults vary.
-
-Usage
------
-    # Use defaults (C:\\AI-Project\\... on Windows, ./AI-Project on others)
-    from config import TOKENIZER_FILE, MODEL_FILE, KNOWLEDGE_FILES
-
-    # Override per-process
-    #   set AI_PROJECT_ROOT=/opt/ai-project
-    #   set MODEL_FILE=C:\\models\\v2\\reasoning_model_v1.pt
+All paths and runtime settings can be overridden through environment variables.
+By default, paths resolve relative to this repository rather than a machine-specific
+location, so a normal clone works from any directory.
 """
 
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 
@@ -25,91 +16,41 @@ from pathlib import Path
 # Project root resolution
 # ----------------------------------------------------------------------
 
-# Resolve the project root in this priority:
-#   1. AI_PROJECT_ROOT environment variable (explicit override)
-#   2. The parent of this file when it lives at <project>/config.py
-#   3. The Windows default of C:\\AI-Project\\ (project's original home)
-#
-# On Linux/macOS the default differs from Windows so we pick the right one
-# based on the current platform.
-
-def _default_project_root() -> Path:
-    """Pick a sensible default project root for the current platform."""
-    if os.name == "nt":
-        # Original Windows project home.
-        return Path("C:/AI-Project")
-    # POSIX - default to a sibling folder beside whatever sits at $HOME,
-    # or fall back to a literal "AI-Project" if needed.
-    return Path.home() / "AI-Project"
-
+# Priority:
+#   1. AI_PROJECT_ROOT environment variable
+#   2. Repository root (directory containing this config.py)
+_REPO_ROOT = Path(__file__).resolve().parent
 
 PROJECT_ROOT: Path = Path(
-    os.environ.get(
-        "AI_PROJECT_ROOT",
-        str(_default_project_root()),
-    )
+    os.environ.get("AI_PROJECT_ROOT", str(_REPO_ROOT))
 ).expanduser().resolve()
 
 
 # ----------------------------------------------------------------------
-# Data and checkpoint directory layout
+# Data / checkpoints / logs
 # ----------------------------------------------------------------------
-#
-# We mirror the on-disk layout used by the project's build scripts:
-#   <root>/data/         <- tokenizer and knowledge corpus text files
-#   <root>/checkpoints/  <- trained model weights (.pt files)
-#
-# Both directories can also be overridden independently via env vars.
 
-#: Directory holding tokenizer JSON files and knowledge corpus text files.
 DATA_DIR: Path = Path(
-    os.environ.get(
-        "AI_PROJECT_DATA_DIR",
-        str(PROJECT_ROOT / "data"),
-    )
+    os.environ.get("AI_PROJECT_DATA_DIR", str(PROJECT_ROOT / "data"))
 ).expanduser().resolve()
 
-#: Directory holding trained model checkpoints (.pt files).
 CHECKPOINTS_DIR: Path = Path(
-    os.environ.get(
-        "AI_PROJECT_CHECKPOINTS_DIR",
-        str(PROJECT_ROOT / "checkpoints"),
-    )
+    os.environ.get("AI_PROJECT_CHECKPOINTS_DIR", str(PROJECT_ROOT / "checkpoints"))
 ).expanduser().resolve()
-
-
-# ----------------------------------------------------------------------
-# Logs directory
-# ----------------------------------------------------------------------
-#
-# Single source of truth for where the project writes its rotating
-# log files and other generated artifacts (feedback jsonl, exported
-# chats, etc.). Derived from ``PROJECT_ROOT`` so it follows the same
-# env-var override contract. Override with AI_PROJECT_LOGS_DIR.
 
 LOGS_DIR: Path = Path(
-    os.environ.get(
-        "AI_PROJECT_LOGS_DIR",
-        str(PROJECT_ROOT / "logs"),
-    )
+    os.environ.get("AI_PROJECT_LOGS_DIR", str(PROJECT_ROOT / "logs"))
 ).expanduser().resolve()
 
 
 # ----------------------------------------------------------------------
-# Model and tokenizer artifacts
+# Model / tokenizer artifacts
 # ----------------------------------------------------------------------
 
-#: Path to the BPE tokenizer JSON used by the reasoning model.
-#: Override with TOKENIZER_FILE if you have trained a custom one.
 TOKENIZER_FILE: Path = Path(
-    os.environ.get(
-        "TOKENIZER_FILE",
-        str(DATA_DIR / "tokenizer_v2.json"),
-    )
+    os.environ.get("TOKENIZER_FILE", str(DATA_DIR / "tokenizer_v2.json"))
 ).expanduser().resolve()
 
-#: Path to the trained PyTorch state-dict for the reasoning model.
-#: Override with MODEL_FILE to point at a different checkpoint.
 MODEL_FILE: Path = Path(
     os.environ.get(
         "MODEL_FILE",
@@ -121,14 +62,6 @@ MODEL_FILE: Path = Path(
 # ----------------------------------------------------------------------
 # Knowledge corpus
 # ----------------------------------------------------------------------
-#
-# Multiple text files are supported so the corpus can be grown without
-# touching code. Each entry below corresponds to one plain-text file
-# loaded by retriever_v2.load_chunks().
-#
-# Paths can be overridden individually via the KNOWLEDGE_FILES environment
-# variable as a comma-separated list, or each file can be set via its
-# own environment variable (KNOWLEDGE_FILE_1, KNOWLEDGE_FILE_2, ...).
 
 _DEFAULT_KNOWLEDGE_FILES = [
     DATA_DIR / "wikitext_v2.txt",
@@ -136,75 +69,52 @@ _DEFAULT_KNOWLEDGE_FILES = [
 ]
 
 
+def _split_knowledge_override(raw: str) -> list[str]:
+    """Accept comma-separated values and the platform path separator."""
+    if not raw:
+        return []
+    if os.pathsep == ";":
+        parts = re.split(r"[;,]", raw)
+    else:
+        # On POSIX, ':' may appear in unusual path-like values; comma is the
+        # documented portable delimiter while os.pathsep remains supported.
+        parts = raw.split(",") if "," in raw else raw.split(os.pathsep)
+    return [part.strip() for part in parts if part.strip()]
+
+
 def _resolve_knowledge_files() -> list[Path]:
-    """Build the KNOWLEDGE_FILES list from environment overrides or defaults."""
     override = os.environ.get("KNOWLEDGE_FILES")
     if override:
-        return [
-            Path(p.strip()).expanduser().resolve()
-            for p in override.split(os.pathsep)
-            if p.strip()
-        ]
+        return [Path(p).expanduser().resolve() for p in _split_knowledge_override(override)]
 
     resolved: list[Path] = []
     for index, default_path in enumerate(_DEFAULT_KNOWLEDGE_FILES, start=1):
-        env_name = f"KNOWLEDGE_FILE_{index}"
-        raw = os.environ.get(env_name)
-        if raw:
-            resolved.append(Path(raw).expanduser().resolve())
-        else:
-            resolved.append(default_path.expanduser().resolve())
+        raw = os.environ.get(f"KNOWLEDGE_FILE_{index}")
+        resolved.append(
+            Path(raw).expanduser().resolve()
+            if raw
+            else default_path.expanduser().resolve()
+        )
     return resolved
 
 
-#: Ordered list of knowledge corpus text files used by the retriever.
 KNOWLEDGE_FILES: list[Path] = _resolve_knowledge_files()
 
 
 # ----------------------------------------------------------------------
-# Generation and retrieval settings
+# Generation / retrieval settings
 # ----------------------------------------------------------------------
-#
-# Plain ints / floats are read via os.environ.get with a default. They can
-# be overridden either with int(...) conversions or as strings - here we
-# cast through int/float so the type contract is preserved.
 
-#: Maximum number of input tokens fed to the model per generation call.
-MAX_INPUT_TOKENS: int = int(
-    os.environ.get(
-        "MAX_INPUT_TOKENS",
-        "480",
-    )
-)
+MAX_INPUT_TOKENS: int = int(os.environ.get("MAX_INPUT_TOKENS", "480"))
+MAX_NEW_TOKENS: int = int(os.environ.get("MAX_NEW_TOKENS", "50"))
+CONFIDENCE_THRESHOLD: float = float(os.environ.get("CONFIDENCE_THRESHOLD", "0.80"))
 
-#: Maximum number of new tokens the model is allowed to emit per call.
-MAX_NEW_TOKENS: int = int(
-    os.environ.get(
-        "MAX_NEW_TOKENS",
-        "50",
-    )
-)
-
-#: Minimum extraction confidence (0.0-1.0) required to accept an answer.
-CONFIDENCE_THRESHOLD: float = float(
-    os.environ.get(
-        "CONFIDENCE_THRESHOLD",
-        "0.80",
-    )
-)
-
-
-# ----------------------------------------------------------------------
-# Convenience helpers (optional)
-# ----------------------------------------------------------------------
 
 def knowledge_files_str() -> str:
-    """Return a printable summary of the configured knowledge files."""
     return ", ".join(str(p) for p in KNOWLEDGE_FILES)
 
 
 if __name__ == "__main__":
-    # Allow `python config.py` to print the resolved configuration.
     print("PROJECT_ROOT      :", PROJECT_ROOT)
     print("DATA_DIR          :", DATA_DIR)
     print("CHECKPOINTS_DIR   :", CHECKPOINTS_DIR)
