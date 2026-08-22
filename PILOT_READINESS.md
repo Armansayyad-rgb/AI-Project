@@ -37,26 +37,28 @@ A limited customer pilot should not begin until every required item below is com
 
 - [x] API responses can return source evidence
 - [x] factual-answer extraction is grounded against matching retrieved chunks
-- [ ] add an automated assertion that every supported final answer is traceable to the evidence returned to the caller
-- [ ] define behavior for conflicting or mutually inconsistent source documents
+- [x] automated traceability checks require supported answers to match returned evidence
+- [x] conflicting high-relevance evidence is handled conservatively rather than presented as a settled fact
+- [ ] make answer-generation provenance and returned citations share the exact same evidence object rather than reconstructing citations after answering
 
 ### Security and input handling
 
 - [x] public security boundaries are documented in `SECURITY.md`
-- [ ] enforce explicit request/document size limits
+- [x] explicit API request/text/query limits are enforced
 - [ ] verify filename/path sanitization for uploaded documents
-- [ ] test malformed PDF, DOCX, TXT, and API payload handling
-- [ ] ensure external exception details are not returned to untrusted clients
+- [ ] test malformed PDF, DOCX, and TXT upload handling end to end
+- [x] external API exception details are not returned to untrusted clients
 - [ ] define retention/deletion behavior for uploaded documents, indexes, logs, and feedback
+- [ ] add explicit UI upload-size limits matching the documented pilot policy
 
 ### Reproducibility and deployment
 
 - [x] GitHub Actions CI exists and passes on `master`
 - [x] manual CI dispatch is available
 - [x] a Windows test runner is documented
-- [ ] verify installation from a clean machine/environment
+- [x] installation from a fresh disposable Python 3.11 environment has been verified
 - [ ] verify Docker build and startup from a clean checkout
-- [ ] record dependency versions used for a pilot release
+- [x] validated direct dependency versions are pinned for the current checkpoint
 - [ ] tag a reproducible pilot candidate commit
 
 ### Performance
@@ -78,12 +80,12 @@ A limited customer pilot should not begin until every required item below is com
 
 ## Recommended next engineering checkpoint
 
-The next checkpoint should focus on **input hardening and reproducibility**, not additional retrieval tuning:
+The next checkpoint should focus on measured scale and remaining operational hardening rather than additional retrieval-score tuning:
 
-1. enforce document/request size limits and safe API errors;
-2. add malformed-input tests;
-3. verify a clean Docker/installation path;
-4. record RAM/VRAM and ingest/query performance;
+1. record RAM/VRAM and ingest/query performance at multiple corpus sizes;
+2. harden PDF/DOCX/TXT upload limits, errors, provenance, and deletion behavior;
+3. make citation provenance originate from the exact evidence used by answer generation;
+4. verify Docker build/start on a clean checkout;
 5. expand the held-out set with realistic licensed technical documents.
 
 Only after those gates are stable should the project move to a real external pilot.
