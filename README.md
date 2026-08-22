@@ -128,6 +128,15 @@ http://localhost:7860
 
 Model checkpoints are not stored in Git. If your chosen runtime path requires a checkpoint, provide it through the configured checkpoint directory or Docker volume.
 
+The Docker image includes the repository corpus and tokenizer. The Compose
+`ralg_data` volume is used only for runtime uploads; provide the model
+checkpoint separately at `/app/checkpoints/v2/reasoning_model_v1.pt` before
+starting model-backed API or UI requests.
+
+The optional polish LLM is not required for the core API or UI. If its model
+files or optional runtime dependencies are unavailable, startup logs a warning
+and the UI continues with the core retrieval answer path.
+
 ## Windows test runner
 
 After setup, run:
