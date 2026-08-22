@@ -114,3 +114,11 @@ diagnostics/
 benchmark_v4_results.json
 reliability_benchmark_results.json
 eval_*.txt
+data/embedding_train.jsonl
+data/instruction_train.jsonl
+data/instruction_train_v2.jsonl
+data/instruction_train_v3.jsonl
+data/reasoning_train_v1.jsonl
+data/reasoning_train_v1_clean.jsonl
+data/extractive_qa_v4.jsonl
+data/extractive_qa_v4_clean.jsonl
