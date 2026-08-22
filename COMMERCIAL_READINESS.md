@@ -1,26 +1,47 @@
 # Commercial Readiness
 
-This file keeps the public commercial direction clear without exposing private strategy.
+This document describes the public readiness criteria for RALG without exposing private strategy, customer information, or valuation targets.
 
 ## Current stage
 
-RALG is an early technical proof. It has a working local pipeline, document ingestion, web UI, Docker support, and evaluation tooling.
+RALG is an early technical proof with a working local pipeline, document ingestion, web UI, API, Docker support, and evaluation tooling.
 
-It is not yet ready for strong commercial claims.
+It is **not yet production-ready** and should not be presented as having proven superiority over conventional RAG systems.
 
-## What needs to be proven
+## What is already demonstrated
 
-To become credible for pilots, investment, or acquisition interest, the project needs:
+- local document ingestion and question answering
+- evidence-oriented retrieval and answer generation
+- unsupported / false-premise rejection paths
+- repeatable synthetic retrieval benchmarks
+- a hard benchmark with distractors and multi-evidence cases
+- end-to-end API reliability testing
+- local web UI and Docker packaging
 
-- a narrow use case
-- fair benchmark against a simple baseline
-- repeatable evaluation commands
-- reliable retrieval results
-- supported-answer accuracy target in the chosen domain
-- latency and memory report
-- simple demo with sample documents
-- clear limitations
-- clean public documentation
+## Required before customer pilots
+
+The following should be treated as release gates rather than marketing goals:
+
+- stable supported-answer accuracy in the chosen domain
+- low false-support rate for unsupported questions
+- runtime-ingested documents ranking correctly against the static knowledge base
+- evidence returned to the user matching the evidence actually used for the answer
+- repeatable installation on a clean machine
+- passing CI and Docker startup checks
+- latency and memory measurements on representative hardware
+- clear handling of malformed or oversized document uploads
+- documented security boundaries for local deployment
+- a fixed held-out evaluation set that is not tuned after failures are observed
+
+## Required before strong technical or investor claims
+
+- larger, less hand-designed benchmark data
+- realistic or independently sourced manuals/SOPs with clear usage rights
+- baseline comparison performed under identical data and hardware conditions
+- reproducible benchmark versions tied to commits
+- evidence that any measured retrieval advantage survives subsequent code changes
+- documented failure examples, not only aggregate scores
+- provenance and licensing records for public training/evaluation data
 
 ## Safe positioning
 
@@ -32,16 +53,22 @@ To become credible for pilots, investment, or acquisition interest, the project 
 - maintenance teams
 - industrial documentation teams
 - internal technical support teams
-- small companies that cannot send documents to cloud AI systems
+- organizations that prefer not to send private documents to hosted AI services
 
 ## Keep private
 
-The following should not be stored in the public repo:
+The following should not be stored in the public repository:
 
 - valuation targets
 - acquisition strategy
 - investor negotiation notes
-- private customer lists
+- private customer or prospect lists
+- customer documents
 - non-public benchmark data
 - proprietary deployment code
 - private model weights
+- credentials, API keys, or access tokens
+
+## Public-reporting rule
+
+Benchmark reports should clearly distinguish **historical results**, **current verified results**, and **targets**. A synthetic or historical result should never be presented as current production performance without a fresh reproducible run.
