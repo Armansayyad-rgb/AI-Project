@@ -219,7 +219,7 @@ def health() -> dict[str, str]:
 def stats() -> StatsResponse:
     pipeline = get_pipeline()
     knowledge_files = [
-        str(p) for p in DATA_DIR.glob("*.txt")
+        p.name for p in DATA_DIR.glob("*.txt")
     ] if DATA_DIR.exists() else []
     return StatsResponse(
         device=pipeline.get("device", "unknown"),
@@ -241,15 +241,14 @@ def query(request: QueryRequest) -> QueryResponse:
             request.question.strip(),
             verbose=False,
         )
-        sources = (
-            collect_sources(
-                pipeline,
-                request.question.strip(),
-                request.top_k,
-                answer=str(result.get("answer", "")),
-            )
-            if request.include_sources
-            else []
+        # Grounding and conflict checks must not depend on whether the caller
+        # chooses to display sources. Collect evidence internally, then omit it
+        # from the response when include_sources=False.
+        grounding_sources = collect_sources(
+            pipeline,
+            request.question.strip(),
+            request.top_k,
+            answer=str(result.get("answer", "")),
         )
 
         confidence = result.get("confidence")
@@ -258,10 +257,10 @@ def query(request: QueryRequest) -> QueryResponse:
 
         answer = str(result.get("answer", ""))
         supported = is_traceable_support(
-            answer, bool(result.get("supported", False)), sources
+            answer, bool(result.get("supported", False)), grounding_sources
         )
         conflict = supported and detect_evidence_conflict(
-            request.question.strip(), sources
+            request.question.strip(), grounding_sources
         )
         if conflict:
             answer = CONFLICT_RESPONSE
@@ -273,7 +272,7 @@ def query(request: QueryRequest) -> QueryResponse:
             supported=supported,
             confidence=float(confidence) if confidence is not None else None,
             answer_type="conflict" if conflict else str(result.get("answer_type", "unknown")),
-            sources=sources,
+            sources=grounding_sources if request.include_sources else [],
             latency_ms=round((time.perf_counter() - started) * 1000, 2),
         )
 
@@ -299,7 +298,6 @@ def ingest(request: IngestRequest) -> IngestResponse:
     """
     pipeline = get_pipeline()
 
-    # Create a document record
     doc_name = request.document_name or f"doc_{int(time.time())}"
     doc = UploadedDocument(
         name=doc_name,
@@ -308,7 +306,6 @@ def ingest(request: IngestRequest) -> IngestResponse:
         text=request.text,
     )
 
-    # Chunk and attach
     doc.chunks = chunk_text(doc.text)
     doc.chunk_count = len(doc.chunks)
 
