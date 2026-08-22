@@ -43,7 +43,12 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from rag_chat_v2 import answer_question, initialize_pipeline  # noqa: E402
-from webui.chat_handler import collect_sources, is_traceable_support  # noqa: E402
+from webui.chat_handler import (  # noqa: E402
+    CONFLICT_RESPONSE,
+    collect_sources,
+    detect_evidence_conflict,
+    is_traceable_support,
+)
 from webui.document_processor import (
     UploadedDocument,
     chunk_text,
@@ -254,12 +259,19 @@ def query(request: QueryRequest) -> QueryResponse:
         supported = is_traceable_support(
             answer, bool(result.get("supported", False)), sources
         )
+        conflict = supported and detect_evidence_conflict(
+            request.question.strip(), sources
+        )
+        if conflict:
+            answer = CONFLICT_RESPONSE
+            supported = False
+            confidence = None
 
         return QueryResponse(
             answer=answer,
             supported=supported,
             confidence=float(confidence) if confidence is not None else None,
-            answer_type=str(result.get("answer_type", "unknown")),
+            answer_type="conflict" if conflict else str(result.get("answer_type", "unknown")),
             sources=sources,
             latency_ms=round((time.perf_counter() - started) * 1000, 2),
         )
