@@ -1,16 +1,16 @@
-# Runtime dependencies for AI-Project.
-# Pin the web UI stack to versions known to work together with Gradio 4.44.1.
+# Runtime dependencies for RALG Engine.
+# Gradio/web-stack versions are pinned where compatibility is sensitive.
 
-# Core deep-learning stack (CPU-only is fine; CUDA is auto-detected at runtime).
+# Core deep-learning stack (CPU-only is fine; CUDA is detected at runtime).
 torch>=2.7.1
 
-# BPE tokenizer used by SmallLMV2 / SmallLM.
+# BPE tokenizer used by the local reasoning model.
 tokenizers>=0.22.2,<=0.23.1
 
-# Numerical utilities used by models and tokenizers.
+# Numerical utilities.
 numpy>=2.4.4,<3.0
 
-# Used by src/download_corpus.py to pull the WikiText corpus from HF Hub.
+# Used by src/download_corpus.py to pull the WikiText corpus from Hugging Face.
 datasets>=5.0.0,<6.0
 
 # Gradio 4.44.1-compatible web stack.
