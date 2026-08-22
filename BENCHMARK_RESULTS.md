@@ -1,17 +1,31 @@
 # Benchmark Results
 
-This file records public benchmark runs for RALG Engine.
+This file records public benchmark runs for RALG Engine. Results below are engineering evidence, not commercial performance claims.
 
-## Retrieval proof v1 — 50-case synthetic technical document benchmark
+> **Important:** these runs were produced at different points in development. Do not treat values from different runs as one simultaneous result. The datasets are synthetic and hand-designed; independent or real-world validation is still required.
 
-Date: 2026-08-19  
-Command:
+## Current interpretation
+
+The public retrieval benchmarks currently establish three things:
+
+1. the evaluation runner is repeatable on 50-case technical-document datasets;
+2. RALG can match a simple lexical baseline on the direct synthetic benchmark; and
+3. some historical hard-benchmark runs showed improved top-rank ordering, but that advantage has not yet been established as stable across subsequent versions.
+
+Accordingly, the safe public claim is **not** that RALG is superior to conventional RAG. The safe claim is that RALG has a reproducible evaluation framework and has shown promising ranking behavior on synthetic distractor-heavy cases that still requires broader validation.
+
+---
+
+## Direct synthetic benchmark
+
+**Date:** 2026-08-19  
+**Command:**
 
 ```powershell
 python src\retrieval_proof_v1.py --dataset data\technical_doc_benchmark_v1.jsonl --knowledge-file data\technical_docs_sample.txt
 ```
 
-Dataset:
+**Dataset:**
 
 - 50 total cases
 - 41 supported technical-document questions
@@ -19,71 +33,29 @@ Dataset:
 - synthetic sample corpus at `data/technical_docs_sample.txt`
 - corpus size: 41 chunks
 
-## Summary
-
 | System | Cases | Recall@1 | Recall@3 | Recall@5 | MRR | Unsupported rejection@5 | Accuracy@5 | Avg latency | P95 latency |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | baseline_v2 | 50 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 0.30 ms | 0.57 ms |
 | ralg_v4 | 50 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.93 ms | 6.53 ms |
 
-## Interpretation
+### Interpretation
 
-This benchmark proves the retrieval proof runner works on a larger synthetic technical-document set.
+- baseline_v2 and ralg_v4 tie on accuracy, recall, MRR, and unsupported rejection;
+- ralg_v4 is slower on this benchmark; and
+- because the set is synthetic and mostly direct lookup, it does not demonstrate a RALG advantage.
 
-Current finding:
+---
 
-- baseline_v2 and ralg_v4 tie on accuracy, recall, MRR, and unsupported rejection
-- ralg_v4 is slower than baseline on this benchmark
-- this benchmark is still synthetic and mostly direct lookup, so it does not yet prove a RALG advantage
+## Hard synthetic benchmark
 
-## Commercial meaning
-
-This is a useful engineering checkpoint, not a commercial proof yet.
-
-The project can now show:
-
-- repeatable benchmark command
-- baseline-vs-RALG comparison
-- technical-document dataset structure
-- supported and unsupported question scoring
-- false-premise contradiction scoring
-
-The project still needs:
-
-- harder multi-hop questions
-- larger/noisier corpus
-- confusing near-match documents
-- real or realistic manuals/SOPs
-- a benchmark where query planning provides measurable value
-
-## Next benchmark milestone
-
-Create a harder v2 benchmark where plain lexical retrieval is expected to struggle.
-
-Needed additions:
-
-- distractor documents with similar terms
-- questions that require two evidence chunks
-- comparison questions across two procedures
-- false-premise questions with subtle contradiction
-- unsupported questions that share many keywords with real documents
-- latency/accuracy tradeoff analysis
-
-Minimum target before making strong claims:
-
-- RALG must beat baseline on at least one meaningful metric, or it should be described only as experimental.
-
-
-## Retrieval proof v1 — hard synthetic technical document benchmark
-
-Date: 2026-08-19  
-Command:
+**Date:** 2026-08-19  
+**Command:**
 
 ```powershell
 python src\retrieval_proof_v1.py --dataset data\technical_doc_benchmark_hard_v1.jsonl --knowledge-file data\technical_docs_hard_sample.txt
 ```
 
-Dataset:
+**Dataset:**
 
 - 50 total cases
 - 39 supported technical-document questions
@@ -93,53 +65,56 @@ Dataset:
 - synthetic hard corpus at `data/technical_docs_hard_sample.txt`
 - corpus size: 51 chunks
 
-## Hard benchmark summary
+### Recorded hard-benchmark runs
 
-| System | Cases | Recall@1 | Recall@3 | Recall@5 | MRR | Unsupported rejection@5 | Accuracy@5 | Avg latency | P95 latency |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| baseline_v2 | 50 | 0.9231 | 1.00 | 1.00 | 0.9615 | 1.00 | 1.00 | 0.32 ms | 0.56 ms |
-| ralg_v4 | 50 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 2.27 ms | 6.44 ms |
+| Run | baseline Recall@1 | RALG Recall@1 | baseline MRR | RALG MRR | Accuracy@5 | Notes |
+|---|---:|---:|---:|---:|---:|---|
+| Earlier V4 run | 0.9231 | 1.00 | 0.9615 | 1.00 | 1.00 both | First measured top-rank improvement on distractors |
+| V4.2 rerun after `343ea0e` | 0.9231 | 0.9231 | not separately recorded | not separately recorded | 1.00 both | Earlier top-rank advantage was not preserved in this rerun |
 
-## Hard benchmark interpretation
+For the earlier V4 run, latency was:
 
-The hard benchmark is more useful than the first 50-case direct benchmark because Recall@1 dropped below 100%, meaning distractors are starting to matter.
+- baseline_v2 average: 0.32 ms
+- ralg_v4 average: 2.27 ms
+- ralg_v4 P95: 6.44 ms
 
-Current finding:
+### Interpretation
 
-- ralg_v4 now beats baseline_v2 on Recall@1 and MRR
-- baseline_v2 Recall@1: 0.9231
-- ralg_v4 Recall@1: 1.00
-- ralg_v4 remains slower
-- the measured advantage comes from question-aware V4 ranking on distractor-heavy cases
+The hard benchmark is more useful than the direct benchmark because distractors affect first-rank retrieval. One historical V4 run placed the correct evidence first in cases where the lexical baseline left it at rank 2. A later V4.2 rerun did not preserve that Recall@1 advantage.
 
+This means **there is promising evidence, but no stable superiority claim yet**.
 
+---
 
-## V4.2 rerun note
+## Reliability benchmark
 
-After commit `343ea0e` (RALG V4.2 multi-hop and false-premise changes), the hard benchmark was rerun. The quality metrics did not change on this synthetic hard benchmark:
+End-to-end API reliability is tracked separately in [RELIABILITY_BENCHMARK.md](RELIABILITY_BENCHMARK.md). Retrieval metrics and end-to-end answer reliability should not be conflated: a correct document in the top-k does not guarantee a correct supported answer.
 
-- baseline_v2 Recall@1: 0.9231
-- ralg_v4 Recall@1: 0.9231
-- both Accuracy@5: 1.00
-- ralg_v4 remains slower
+---
 
-This means the current hard benchmark still does not expose a measurable RALG advantage.
+## Commercial meaning
 
+These benchmarks are useful engineering checkpoints. They demonstrate:
 
-## First measured RALG retrieval advantage
+- repeatable benchmark commands;
+- baseline-vs-RALG comparison;
+- supported and unsupported question scoring;
+- false-premise testing;
+- distractor, comparison, and multi-evidence cases; and
+- measurable latency tradeoffs.
 
-After adding V4 question-aware ranking for distractor-heavy cases, the hard benchmark shows the first measurable retrieval-quality advantage:
+They do **not** yet establish production readiness or a general technical advantage.
 
-- baseline_v2 Recall@1: 0.9231
-- ralg_v4 Recall@1: 1.00
-- baseline_v2 MRR: 0.9615
-- ralg_v4 MRR: 1.00
+## Next benchmark milestone
 
-Tradeoff:
+Before making stronger claims, evaluate on a larger and less hand-designed corpus with:
 
-- baseline_v2 avg latency: 0.32 ms
-- ralg_v4 avg latency: 2.27 ms
+- realistic manuals and SOPs;
+- confusing near-match documents;
+- multi-hop questions requiring multiple evidence chunks;
+- unsupported questions with strong lexical overlap;
+- fixed datasets that are not tuned after seeing failures;
+- memory and latency measurements; and
+- ideally an external or held-out evaluation set.
 
-Interpretation:
-
-RALG V4 now ranks the correct evidence first on the hard synthetic benchmark, while the baseline leaves three cases at rank 2. This is a small but real proof point. The next milestone is to confirm the advantage on a larger and less hand-designed benchmark.
+A stronger claim should be made only if RALG consistently beats the baseline on a meaningful quality metric without unacceptable reliability or latency regressions.
