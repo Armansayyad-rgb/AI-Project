@@ -32,11 +32,36 @@ jobs:
               Path("data/technical_doc_benchmark_hard_v1.jsonl"),
           ]
           for path in files:
+              assert path.exists(), f"missing benchmark: {path}"
+              rows = 0
               for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-                  if line.strip():
-                      json.loads(line)
-              print(f"validated {path}")
+                  if not line.strip():
+                      continue
+                  item = json.loads(line)
+                  assert "question" in item, f"{path}:{line_no} missing question"
+                  assert "supported" in item, f"{path}:{line_no} missing supported flag"
+                  rows += 1
+              assert rows > 0, f"empty benchmark: {path}"
+              print(f"validated {path}: {rows} cases")
           PY
+
+      - name: Validate project configuration
+        run: |
+          python - <<'PY'
+          import config
+          from pathlib import Path
+          assert Path(config.PROJECT_ROOT).name
+          assert isinstance(config.KNOWLEDGE_FILES, list)
+          assert config.MAX_INPUT_TOKENS > 0
+          assert config.MAX_NEW_TOKENS > 0
+          assert 0.0 <= config.CONFIDENCE_THRESHOLD <= 1.0
+          print("configuration import OK")
+          PY
+
+      - name: Check Docker entrypoint module exists
+        run: |
+          test -f src/webui/app.py
+          grep -q 'CMD \["python", "-m", "webui.app"\]' Dockerfile
 
       - name: Check required public files
         run: |
@@ -45,3 +70,12 @@ jobs:
           test -f SECURITY.md
           test -f BENCHMARK_RESULTS.md
           test -f RELIABILITY_BENCHMARK.md
+          test -f COMMERCIAL_READINESS.md
+
+      - name: Reject accidentally committed secrets
+        run: |
+          test ! -f .env
+          test ! -f credentials.json
+          test ! -f secrets.json
+          test ! -f secrets.yaml
+          test ! -f secrets.yml
