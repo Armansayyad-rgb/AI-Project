@@ -43,7 +43,7 @@ if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
 from rag_chat_v2 import answer_question, initialize_pipeline  # noqa: E402
-from webui.chat_handler import collect_sources  # noqa: E402
+from webui.chat_handler import collect_sources, is_traceable_support  # noqa: E402
 from webui.document_processor import (
     UploadedDocument,
     chunk_text,
@@ -240,6 +240,7 @@ def query(request: QueryRequest) -> QueryResponse:
                 pipeline,
                 request.question.strip(),
                 request.top_k,
+                answer=str(result.get("answer", "")),
             )
             if request.include_sources
             else []
@@ -249,9 +250,14 @@ def query(request: QueryRequest) -> QueryResponse:
         if not isinstance(confidence, (int, float)):
             confidence = None
 
+        answer = str(result.get("answer", ""))
+        supported = is_traceable_support(
+            answer, bool(result.get("supported", False)), sources
+        )
+
         return QueryResponse(
-            answer=str(result.get("answer", "")),
-            supported=bool(result.get("supported", False)),
+            answer=answer,
+            supported=supported,
             confidence=float(confidence) if confidence is not None else None,
             answer_type=str(result.get("answer_type", "unknown")),
             sources=sources,
