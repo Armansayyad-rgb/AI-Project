@@ -18,16 +18,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Compile active Python runtime sources
-        run: |
-          python -m py_compile \
-            config.py \
-            src/api_server.py \
-            src/retriever_v4.py \
-            src/rag_chat_v2.py \
-            src/webui/app.py \
-            src/webui_bootstrap.py \
-            src/webui_launcher.py
+      - name: Compile Python sources
+        run: python -m compileall -q config.py src
 
       - name: Validate benchmark JSONL
         run: |
