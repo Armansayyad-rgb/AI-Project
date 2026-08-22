@@ -136,15 +136,15 @@ def save_checkpoint(
 
 
 def main():
-if not torch.cuda.is_available():
-            import warnings
-            warnings.warn(
-                "CUDA GPU not detected - training will be slow on CPU. "
-                "Continuing with CPU training.",
-                UserWarning,
-            )
+    if not torch.cuda.is_available():
+        import warnings
+        warnings.warn(
+            "CUDA GPU not detected - training will be slow on CPU. "
+            "Continuing with CPU training.",
+            UserWarning,
+        )
 
-      device = "cuda"
+    device = "cuda"
 
     print(
         "GPU:",
@@ -349,4 +349,3 @@ if not torch.cuda.is_available():
 
 if __name__ == "__main__":
     main()
-    
