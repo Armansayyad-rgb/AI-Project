@@ -6,7 +6,7 @@ A Gradio web interface for the AI Project RAG chatbot. Lets non-technical users 
 
 ```powershell
 cd C:\AI-Project
-.venv\Scripts\python.exe -m webui_launcher
+.venv\Scripts\python.exe src\webui_bootstrap.py
 ```
 
 Then open http://127.0.0.1:7860.

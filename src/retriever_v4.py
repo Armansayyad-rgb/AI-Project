@@ -1638,6 +1638,16 @@ def select_evidence_items(
         merged_results,
         start=1,
     ):
+        chunk_words = set(
+            useful_words(
+                item["chunk"]
+            )
+        )
+        chunk_has_subject = bool(
+            subject_words
+            & chunk_words
+        )
+
         for sentence_index, sentence in enumerate(
             split_sentences(
                 item[
@@ -1721,6 +1731,10 @@ def select_evidence_items(
                     "comparison",
                 }
                 and not subject_overlap
+                and not (
+                    chunk_has_subject
+                    and intent_overlap
+                )
             ):
                 # Specialized intent but NO subject
                 # anchor: treat as noise even if the

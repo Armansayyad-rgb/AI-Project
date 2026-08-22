@@ -9,6 +9,20 @@ Then query:
     curl -X POST http://127.0.0.1:8000/query \
       -H "Content-Type: application/json" \
       -d "{\"question\":\"What safety step is required before opening the electrical panel?\",\"top_k\":5}"
+
+Ingest text:
+
+    curl -X POST http://127.0.0.1:8000/ingest \
+      -H "Content-Type: application/json" \
+      -d '{"text":"Your document text here...","document_name":"my_doc"}'
+
+Check stats:
+
+    curl http://127.0.0.1:8000/stats
+
+Health check:
+
+    curl http://127.0.0.1:8000/health
 """
 
 from __future__ import annotations
@@ -27,6 +41,11 @@ if str(SRC_DIR) not in sys.path:
 
 from rag_chat_v2 import answer_question, initialize_pipeline  # noqa: E402
 from webui.chat_handler import collect_sources  # noqa: E402
+from webui.document_processor import (
+    UploadedDocument,
+    chunk_text,
+    attach_documents,
+)  # noqa: E402
 
 
 class QueryRequest(BaseModel):
@@ -45,6 +64,25 @@ class QueryResponse(BaseModel):
     error: str | None = None
 
 
+class IngestRequest(BaseModel):
+    text: str = Field(..., min_length=1)
+    document_name: str | None = None
+
+
+class IngestResponse(BaseModel):
+    document_name: str
+    added_chunks: int
+    total_chunks: int
+
+
+class StatsResponse(BaseModel):
+    device: str
+    model_loaded: bool
+    chunk_count: int
+    knowledge_files: list[str]
+    uptime_seconds: float
+
+
 app = FastAPI(
     title="RALG Engine API",
     version="0.1.0",
@@ -52,6 +90,7 @@ app = FastAPI(
 )
 
 _PIPELINE: dict[str, Any] | None = None
+_START_TIME = time.perf_counter()
 
 
 def get_pipeline() -> dict[str, Any]:
@@ -64,6 +103,21 @@ def get_pipeline() -> dict[str, Any]:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/stats", response_model=StatsResponse)
+def stats() -> StatsResponse:
+    pipeline = get_pipeline()
+    knowledge_files = [
+        str(p) for p in Path("data").glob("*.txt")
+    ] if Path("data").exists() else []
+    return StatsResponse(
+        device=pipeline.get("device", "unknown"),
+        model_loaded=pipeline.get("model") is not None,
+        chunk_count=len(pipeline.get("chunks", [])),
+        knowledge_files=knowledge_files,
+        uptime_seconds=round(time.perf_counter() - _START_TIME, 2),
+    )
 
 
 @app.post("/query", response_model=QueryResponse)
@@ -110,3 +164,34 @@ def query(request: QueryRequest) -> QueryResponse:
             latency_ms=round((time.perf_counter() - started) * 1000, 2),
             error=repr(exc),
         )
+
+
+@app.post("/ingest", response_model=IngestResponse)
+def ingest(request: IngestRequest) -> IngestResponse:
+    """Ingest plain text content into the running pipeline.
+
+    Chunks the text using the same logic as the static knowledge base,
+    merges chunks into the pipeline, and rebuilds the retrieval index.
+    """
+    pipeline = get_pipeline()
+
+    # Create a document record
+    doc_name = request.document_name or f"doc_{int(time.time())}"
+    doc = UploadedDocument(
+        name=doc_name,
+        path=Path(doc_name),
+        ext=".txt",
+        text=request.text,
+    )
+
+    # Chunk and attach
+    doc.chunks = chunk_text(doc.text)
+    doc.chunk_count = len(doc.chunks)
+
+    added = attach_documents(pipeline, [doc])
+
+    return IngestResponse(
+        document_name=doc_name,
+        added_chunks=added,
+        total_chunks=len(pipeline.get("chunks", [])),
+    )

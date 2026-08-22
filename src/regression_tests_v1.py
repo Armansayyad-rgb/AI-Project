@@ -1,5 +1,11 @@
+import os
 import subprocess
 import sys
+from pathlib import Path
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
 
 
 TESTS = [
@@ -91,10 +97,15 @@ TESTS = [
 
 
 def run_test(test):
+    env = os.environ.copy()
+    existing_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = os.pathsep.join(
+        filter(None, (str(PROJECT_ROOT), existing_pythonpath))
+    )
     process = subprocess.run(
         [
             sys.executable,
-            "rag_chat_v2.py",
+            str(SCRIPT_DIR / "rag_chat_v2.py"),
         ],
         input=(
             test["question"]
@@ -102,6 +113,7 @@ def run_test(test):
         ),
         text=True,
         capture_output=True,
+        env=env,
     )
 
     output = (
